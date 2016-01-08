@@ -1,0 +1,330 @@
+<?php
+
+/**
+* FieldtypeImageMarker for ProcessWire.
+*
+* This Fieldtype stores x/y coordinates of markers (referenced pages) placed on a base image.
+*
+* @author Francis Otieno (Kongondo) <kongondo@gmail.com> kongondo.com
+* 
+* @credits Ryan Cramer: Code heavily adpated from his FieldtypeEvents.
+* @credits Helder Cervantes: Module concept.
+*
+* Lincensed under GNU/GPL v2.
+*
+* https://github.com/kongondo/FieldtypeImageMarker
+* Created December 2015
+* 
+* ProcessWire 2.x
+* Copyright (C) 2011 by Ryan Cramer
+* Licensed under GNU/GPL v2, see LICENSE.TXT
+*
+* http://www.processwire.com
+*
+*/
+
+/* @NOTE: WORK IN PROGRESS */
+
+class FieldtypeImageMarker extends FieldtypeMulti {
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Image Marker',
+			'version' => 1,
+			'author' => 'Francis Otieno (Kongondo)',
+			'summary' => 'Field that stores a table of ImageMarkers for a page.',
+			'installs' => 'InputfieldImageMarker', 
+			);
+	}
+
+	/**
+	 * Initialize this Fieldtype
+	 *
+	 */
+	public function init() {
+		parent::init();
+		$dir = dirname(__FILE__);
+		require_once("$dir/ImageMarker.php"); 
+		require_once("$dir/ImageMarkerArray.php"); 
+	}
+
+	/**
+	 * Return the required Inputfield used to populate a field of this type
+	 *
+	 */
+	public function getInputfield(Page $page, Field $field) {
+		$inputfield = $this->modules->get("InputfieldImageMarker"); 
+
+		// our inputfield requires a Page and Field (most Inputfields don't)
+		$inputfield->setPage($page);
+		$inputfield->setField($field);
+
+		// name of the single file field containing the base image on this page
+		$inputfield->set('baseImageFile', $field->baseImageFile);
+
+		// optional(?) selector for finding info pages
+		$inputfield->set('infoPagesSelector', $field->infoPagesSelector);
+
+		// marker style (shape)
+		$inputfield->set('markerStyle', $field->markerStyle);
+
+		// info page label
+		$inputfield->set('infoPageLabel', $field->infoPageLabel);
+
+		// x-coordinate label
+		$inputfield->set('xCoordinateLabel', $field->xCoordinateLabel);
+
+		// y-coordinate label
+		$inputfield->set('yCoordinateLabel', $field->yCoordinateLabel);
+
+		// default page selector (pagefield)
+		$inputfield->set('defaultPageSelect', $field->defaultPageSelect);
+
+		return $inputfield; 
+	}
+
+	/**
+	 * Return a blank ready-to-populate version of a field of this type
+	 *
+	 */
+	public function getBlankValue(Page $page, Field $field) {
+		$ImageMarkers = new ImageMarkerArray($page);
+		$ImageMarkers->setTrackChanges(true); 
+		return $ImageMarkers; 
+	}
+
+	/**
+	 * set the config option fields for this Field
+	 * These appear in the 'Details' Tab when editing an instance of this Field
+	 */
+	public function ___getConfigInputfields(Field $field) {
+		$inputfields = parent::___getConfigInputfields($field);
+
+		// name of a single file field where base image is stored on the current page
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'baseImageFile');
+		$f->attr('value', $field->baseImageFile);
+		$f->label = $this->_('Base Image File Field');
+		$f->description = $this->_('Enter the name of a file field that contains the base image.');
+		$f->notes = $this->_('The field must be a single file field.');
+		
+		$inputfields->append($f);
+
+		//selector for finding 'column' pages
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'infoPagesSelector');
+		$f->attr('value', $field->infoPagesSelector);
+		$f->label = $this->_('Info Pages Selector');
+		$f->description = $this->_('Optionally enter a selector to find info pages for image markers.');
+		$f->notes = $this->_('If left blank, all non-admin pages will be returned.');
+		
+		$inputfields->append($f);
+
+		// @todo: php code for finding pages?
+
+		//radios: default marker shape (circle vs teardrop vs callout)
+		$f = $this->modules->get('InputfieldRadios');
+		$f->attr('name', 'markerStyle');
+		$f->attr('value', $field->markerStyle ? $field->markerStyle : 1);
+		$f->label =  $this->_('Marker Shape');
+		$f->label =  $this->_('Select a shape for the markers');
+		$f->notes = $this->_('Tear Drop is similar to GMap marker. Callout is rectangular.');
+
+		$radioOptions = array (
+						1 => $this->_('Circle'),
+						2 => $this->_('Tear Drop'),
+						3 => $this->_('Callout'),
+	 	);
+
+		$f->addOptions($radioOptions);
+
+		$inputfields->append($f);
+
+		// label for info page table header
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'infoPageLabel');
+		$f->attr('value', $field->infoPageLabel ? $field->infoPageLabel : 'Information Page');
+		$f->label = $this->_('Information Pages Label');
+		$f->description = $this->_('A label to use in the table header for information pages.');
+
+		$inputfields->append($f);
+
+		// label for x-coordinate axis
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'xCoordinateLabel');
+		$f->attr('value', $field->xCoordinateLabel ? $field->xCoordinateLabel : 'X-Coordinate');
+		$f->label = $this->_('X-Coordinate Label');
+		$f->description = $this->_('A label to use in the table header for x-coordinate.');
+		
+		$inputfields->append($f);
+
+		// label for y-coordinate axis
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'yCoordinateLabel');
+		$f->attr('value', $field->yCoordinateLabel ? $field->yCoordinateLabel : 'Y-Coordinate');
+		$f->label = $this->_('Y-Coordinate Label');
+		$f->description = $this->_('A label to use in the table header for y-coordinate.');
+		
+		$inputfields->append($f);
+
+		//radios: default page selector type (autocomplete vs asmselect)
+		$f = $this->modules->get('InputfieldRadios');
+		$f->attr('name', 'defaultPageSelect');
+		$f->attr('value', $field->defaultPageSelect ? $field->defaultPageSelect : 1);
+		$f->label =  $this->_('Pages Selector');
+		$f->label =  $this->_('Choose a method for selecting pages to add as markers');
+		$f->notes = $this->_('If you will have a large selection of pages to choose from, you may want to use Page Auto Complete.');
+
+		$radioOptions = array (
+						1 => $this->_('Asm Select'),
+						2 => $this->_('Page Auto Complete'),
+	 	);
+
+		$f->addOptions($radioOptions);
+
+		$inputfields->append($f);
+
+		return $inputfields;
+	}
+
+
+    /**
+     * Given a raw value (value as stored in DB), return the value as it would appear in a Page object
+ *
+     * @param Page $page
+     * @param Field $field
+     * @param string|int|array $value
+     * @return string|int|array|object $value
+     *
+     */
+    public function ___wakeupValue(Page $page, Field $field, $value) {
+
+		// if for some reason we already get a valid value, then just return it
+		if($value instanceof ImageMarkerArray) return $value; 
+
+		// start a blank value to be populated
+		$ImageMarkers = $this->getBlankValue($page, $field); 
+
+		// if we were given a blank value, then we've got nothing to do: just return a blank ImageMarkerArray
+		if(empty($value) || !is_array($value)) return $ImageMarkers; 
+
+		// create new ImageMarker objects from each item in the array
+		foreach($value as $v) {
+			$ImageMarker = new ImageMarker();
+			$p = $this->wire('pages')->get($v['data']);
+			if(!$p || !$p->id > 0)  continue;
+			// @todo - grab page object here? + can then create a new property with the page object. No, for now. User to grab page in template file
+			$ImageMarker->info = $v['data']; // note we're converting 'data' to 'info'
+			$ImageMarker->x = $v['x']; 
+			$ImageMarker->y = $v['y'];
+			$ImageMarker->infoLabel = $p->title; // info page title
+			$ImageMarker->setTrackChanges(true); 
+			$ImageMarkers->add($ImageMarker); 
+		}
+
+		$ImageMarkers->resetTrackChanges(); 
+
+                return $ImageMarkers;  
+        }
+
+    /**
+     * Given an 'awake' value, as set by wakeupValue, convert the value back to a basic type for storage in DB. 
+     *              
+     * @param Page $page
+     * @param Field $field
+     * @param string|int|array|object $value
+     * @return string|int
+     *
+     */
+    public function ___sleepValue(Page $page, Field $field, $value) {
+
+		$sleepValue = array();
+
+		// if we are given something other than an ImageMarkerArray, 
+		// then just return a blank array
+		if(!$value instanceof ImageMarkerArray) return $sleepValue; 
+
+		// make the ImageMarkers sort by sort ascending
+		$value->sort('sort'); 
+
+		// convert each ImageMarker to an array within sleepValue
+		foreach($value as $ImageMarker) {
+			$sleepValue[] = array(
+				'data' => (int) $ImageMarker->info, // note: info is becoming data 
+				'x' => $ImageMarker->x, 
+				'y' => $ImageMarker->y
+				); 
+		}
+		return $sleepValue;
+    }
+
+	/**
+	 * Given a value, make it clean for storage within a Page
+	 *
+	 */
+	public function sanitizeValue(Page $page, Field $field, $value) {
+
+		// if given a blank value, return a valid blank value
+		if(empty($value)) return $this->getBlankValue($page, $field, $value); 
+
+		// if given something other than an ImageMarkerArray, throw an error
+		if(!$value instanceof ImageMarkerArray) {
+			throw new WireException("Value set to field '$field->name' must be an ImageMarkerArray"); 
+		}
+
+		// note that sanitization of individual fields within a given ImageMarker is already 
+		// performed by the ImageMarker::set() method, so we don't need to do anything else here.
+
+		return $value; 	
+	}
+
+	/**
+	 * Format a value for output, called when a Page's outputFormatting is on
+	 *
+	 */
+	public function formatValue(Page $page, Field $field, $value) {
+		// we actually don't need to do anything in here since each ImageMarker object
+		// is doing this work in the ImageMarker::get() method.  
+		return $value; 
+	}
+
+	/**
+	 * Return the database schema that defines an ImageMarker
+	 *
+	 */
+	public function getDatabaseSchema(Field $field) {
+		$schema = parent::getDatabaseSchema($field); 
+
+		// 'data' is a required field for any Fieldtype, and we're using it to represent our 'page' field
+		$schema['data'] = 'INT NOT NULL DEFAULT 0'; 
+
+		// our coordinates fields
+		$schema['x'] = 'INT NOT NULL DEFAULT 0'; 
+		$schema['y'] = 'INT NOT NULL DEFAULT 0';
+
+		// indexes, for any fields that need to be searchable from selectors
+		$schema['keys']['data'] = 'KEY data(data)';
+		$schema['keys']['x'] = 'KEY x(x)';
+		$schema['keys']['y'] = 'KEY y(y)';
+
+		return $schema; 
+	}
+
+	/**
+	 * Method called when the field is database-queried from a selector 
+	 *
+	 */
+	public function getMatchQuery($query, $table, $subfield, $operator, $value) {
+
+		// If searching 'date' then assume our default (data) field 
+		if($subfield == 'info') $subfield = 'data';
+
+		// if value is a formatted date, convert it to unix timestamp
+
+		return parent::getMatchQuery($query, $table, $subfield, $operator, $value); 
+	}
+
+
+
+}
+

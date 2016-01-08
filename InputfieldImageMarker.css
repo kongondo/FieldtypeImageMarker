@@ -1,0 +1,94 @@
+/* @NOTE: WORK IN PROGRESS */
+
+table.InputfieldImageMarkers {width: 100%;}
+.InputfieldImageMarkers table tr {border: none;}
+.InputfieldImageMarkers th {padding-bottom: 0; font-weight: bold;}
+.InputfieldImageMarkers tr:not(.ImageMarkerTBD):hover td {background: #eee;}
+
+.InputfieldImageMarkers input[type=number],
+.InputfieldImageMarkers input[type=number],
+.InputfieldImageMarkers input[type=text] {
+	width: 100%; 
+}
+
+.InputfieldImageMarkers th,
+.InputfieldImageMarkers td {
+	padding: 6px 2px;
+	border-bottom: 1px solid #ddd;
+}
+
+.InputfieldImageMarkers .ImageMarkerInfo {width: 45%;}
+.InputfieldImageMarkers .ImageMarkerCoords_X {width: 25%; text-align: right;}
+.InputfieldImageMarkers .ImageMarkerCoords_Y {width: 25%; text-align: right;}
+.InputfieldImageMarkers th.ImageMarkerDel {width: 5%; padding-right: 0;}
+.InputfieldImageMarkers a.ImageMarkerDel {width: 1.5em; display: block;}
+.InputfieldImageMarkers .ImageMarkerTBD td input {text-decoration: line-through;}
+tr a.ImageMarkerDel {padding-left: 15px;}
+tr.highlighted {background: #D1F468;}
+tr.highlighted:hover td {background: #93BF0D !important;}
+
+input[type=text].coords_x, input[type=text].coords_y {text-align: right;}
+
+
+/* @hc */
+.fieldContainer {
+	position: relative;
+	display: inline-block;
+	border: 2px solid #ccc;
+}
+
+
+.fieldContainer img {
+	vertical-align: bottom;
+	width: 100%;
+	height: auto;
+}
+
+
+.fieldContainer .marker {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	cursor: move;
+}
+
+
+.fieldContainer .marker .circle {
+	position: absolute;
+	left: -10px;
+	top: -10px;
+	box-sizing: border-box;
+	width: 2em;
+	height: 2em;
+	border-radius: 100%;
+	background-color: red;
+	border: 3px solid #FFF;
+	color: #FFF;
+	text-align: center;
+	font-size: 1.5em;
+	font-weight: bold;
+	line-height: 1em;
+	padding: 0.5em 0;
+	cursor: move;	
+	display: inline-block;
+
+}
+
+.fieldContainer .marker .center {
+	width: 2px;
+	height: 2px;
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	z-index: 2;
+}
+
+/* @kongondo */
+div.fieldContainer div.highlighted div.circle{
+	border: 3px solid #0A0A0A;
+	background-color: #D1F468;
+	color: #000;
+}
+
+
+
