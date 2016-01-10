@@ -33,7 +33,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 1,
+			'version' => 002,
 			'author' => 'Francis Otieno (Kongondo)',
 			'summary' => 'Input field for ImageMarker.',
 			'requires' => 'FieldtypeImageMarker', 
@@ -157,8 +157,7 @@ class InputfieldImageMarker extends Inputfield {
 	 * Render markup for selecting info pages
 	 *
 	 */
-	public function renderPageSelect() {	
-
+	public function renderPageSelect() {
 
 		$w = new InputfieldWrapper();
 			
@@ -217,63 +216,30 @@ class InputfieldImageMarker extends Inputfield {
 	/**
 	 * Render markers (dots)
 	 *
+	 * Markers rendered according to selected marker style by applying related CSS class.
+	 * Currently user can choose from 3 marker styles: circular (default), tear drop (gmap) and callout.
+	 *
+	 * @access public
 	 * @param object $im Instance of this ImageMarker.
+	 * @param object $cnt Integer numerical position of a single marker.
      * @return string $out Markup with a single marker's output.
      *
 	 */
 	public function renderMarkers($im, $cnt) {
 
-		//@todo - default x/y == 0,0, ok? - YES
-		//@todo - colour each bubble? Would need to use colour picker + save value to db - NO; SOLVED USING NUMBERS
-		//@todo - CONFIGURABLE bubble sizes? - NO
-		//@todo - CONFIGURABLE BUBBLE BORDER + BUBBLE BACKGROUND - NO
-		//@todo - default colours? - NAAH
-		//@todo - JS => RANGE SLIDER/ARROWS FOR INPUT? NAAAH  - FASTER TO TYPE - SO, NO
-		//@todo - reno theme issue; since using img width 100% height auto in CSS, and since x/y saved as px, dots are off in reno theme. Using percentages should sort this out but do we want to do that or force user to upload image of max width x and max height y? - UPDATED: NOW USING PERCENTAGES, SO ISSUE SOLVED
-		//@todo - rename dot to bubble? - RENAMED TO MARKER :-)
-		//@todo - on click of dot, select + highlight? (hidden input checkbox) - NO NEED FOR THIS
-		//@todo - multiple select of rows, so it means, should be able to click on several rows (i.e. don't clear previous) + maybe a clear all selections? - NO NEED FOR THIS SINCE CAN SELECT DELETE ALL
-		//@todo - js positions, use % to deal with reno issue? No; users to upload correct image size? - YES; NOW USING PERCENTAGES
-		//@todo - rename 'info' page to something else? - HMMM..UNSURE
-		//@todo - make tooltip more specific to IM dots only +  unobtrusive
-		//@todo - work on to string method in ImagerMarker.php
-
 		$i = $cnt + 1;
 
-		// populate marker markup with x and y coordinates
-		// @NOTE: VERSION 1
-		$out = '<div id="marker_' . $im->info .'" class="marker" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">
-					<div class="circle">' . $i . '</div>
-					<div class="center"></div>
-				</div>';
-
-		/* 
-
-			@@todo: VERSION 2
-
-			DYNAMIC CSS CLASS BASED ON FIELD SETTING => THESE ARE EXTRA CLASSES => WE NEED MARKER FOR GENERIC STUFF + JS
-			classes are:
-				1. CIRCLE => (default) 'circle'
-				2. GMAP => 'teardrop'
-				3. CALLOUT => 'callout'
-
-
-		*/
-		// populate marker markup with x and y coordinates
-
-		$markerStyle = $this->markerStyle;		
+		$markerStyle = $this->markerStyle;	
 
 		if($markerStyle == 1) $markerStyleClass = 'circle';
 		elseif($markerStyle == 2) $markerStyleClass = 'teardrop';
-		if($markerStyle == 3) $markerStyleClass = 'callout';
+		elseif($markerStyle == 3) $markerStyleClass = 'callout';
 
-		/*$out = '<div id="marker_' . $im->info .'" class="marker '. $markerStyleClass . '" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">
-					<span>' . $i . '</span>
-				</div>';*/
+		$out = '<div id="marker_' . $im->info .'" class="marker '. $markerStyleClass .'" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">' .
+							'<span>' . $i . '</span>' .
+				'</div>';
 
-		#$out = '<div id="marker_' . $im->info .'" class="marker" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">' . $i . '</div>';
-
-		return $out;
+		return $out;		
 		
 	}
 
