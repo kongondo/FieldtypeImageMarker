@@ -117,17 +117,17 @@ div.callout {
 	background: red;
 	line-height: 1.33;
 	max-width: 6em;
-	text-align: center;
-	color: #fff;
 	position: absolute;
 	padding: 0.25em 0.75em;
-	display: inline-block;
 	font-weight: bold;
-	font-size: 1em;
 	transform: translate3d(-50%, -100%, 0);
 	margin-top: -0.5em;
 	z-index: 2;
 	border: 2px solid #fff;
+	/* @kongondo mods */
+	padding: 0.25em 0.35em;
+	width: 2em;
+	height: 2em;
 }
 
 div.callout:before,
