@@ -9,7 +9,6 @@
 * @author Helder Cervantes (heldercervantes) [Fiedltype Concept, JS, HTML, CSS]
 * 
 * @credits Ryan Cramer: Code heavily adpated from his InputfieldEvents. 
-* @credits Helder Cervantes: Module concept, HTML, CSS & Javascript.
 * @credits Roland Toth: HTML & CSS.
 *
 * Lincensed under GNU/GPL v2.
@@ -25,16 +24,13 @@
 *
 */
 
-
-/* @NOTE: WORK IN PROGRESS */
-
 class InputfieldImageMarker extends Inputfield {
 
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 002,
-			'author' => 'Francis Otieno (Kongondo)',
+			'version' => 003,
+			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Input field for ImageMarker.',
 			'requires' => 'FieldtypeImageMarker', 
 			);
@@ -228,15 +224,18 @@ class InputfieldImageMarker extends Inputfield {
 	public function renderMarkers($im, $cnt) {
 
 		$i = $cnt + 1;
-
-		$markerStyle = $this->markerStyle;	
+		$markerStyle = $this->markerStyle;			
+		$markerLabel = $i;
 
 		if($markerStyle == 1) $markerStyleClass = 'circle';
 		elseif($markerStyle == 2) $markerStyleClass = 'teardrop';
-		elseif($markerStyle == 3) $markerStyleClass = 'callout';
+		elseif($markerStyle == 3) {
+			$markerStyleClass = 'callout';
+			$markerLabel = $im->infoLabel;
+		}
 
 		$out = '<div id="marker_' . $im->info .'" class="marker '. $markerStyleClass .'" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">' .
-							'<span>' . $i . '</span>' .
+					'<span>' . $markerLabel . '</span>' .
 				'</div>';
 
 		return $out;		
@@ -256,7 +255,7 @@ class InputfieldImageMarker extends Inputfield {
 		if($process && $process->className() == 'ProcessPageEdit') $page = $process->getPage();
 
 		$baseImage = $page->$baseImageFile->first()->url;
-		$out = '<img src="'. $baseImage . '" alt="" id="marker_base_image"/>';
+		$out = '<img src="'. $baseImage . '" alt="" id="marker_base_image">';
 
 		return $out;
 		

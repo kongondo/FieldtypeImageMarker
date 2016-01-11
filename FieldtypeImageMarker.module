@@ -5,10 +5,10 @@
 *
 * This Fieldtype stores x/y coordinates of markers (referenced pages) placed on a base image.
 *
-* @author Francis Otieno (Kongondo) <kongondo@gmail.com> kongondo.com
-* 
+* @author Francis Otieno (Kongondo) <kongondo@gmail.com> kongondo.com* 
+* @author Helder Cervantes (heldercervantes) [Fiedltype Concept,Inputfield JS, HTML, CSS]
+*
 * @credits Ryan Cramer: Code heavily adpated from his FieldtypeEvents.
-* @credits Helder Cervantes: Module concept.
 *
 * Lincensed under GNU/GPL v2.
 *
@@ -30,8 +30,8 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 2,
-			'author' => 'Francis Otieno (Kongondo)',
+			'version' => 003,
+			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Field that stores a table of ImageMarkers for a page.',
 			'installs' => 'InputfieldImageMarker', 
 			);

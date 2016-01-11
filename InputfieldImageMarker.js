@@ -21,32 +21,31 @@ $(document).ready(function() {
 
 	/* delete table rows */
 	$(document).on("click", ".InputfieldImageMarkers a.ImageMarkerDel", function(e) {
-		var $row = $(this).parents("tr.ImageMarker"); 
+		var $row = $(this).parents("tr.ImageMarker");
 		if($row.size() == 0) {
 			// delete all
 			$(this).parents("thead").next("tbody").find('.ImageMarkerDel').click();
-			return false; 	
+			return false;
 		}
-		var $input = $(this).next('input'); 
+		var $input = $(this).next('input');
 		if($input.val() == 1) {
-			$input.val(0); 
-			$row.removeClass("ImageMarkerTBD"); 
-			$row.removeClass('ui-state-error'); 
+			$input.val(0);
+			$row.removeClass("ImageMarkerTBD");
+			$row.removeClass('ui-state-error');
 		} else {
-			$input.val(1); 
-			$row.addClass("ImageMarkerTBD"); 
+			$input.val(1);
+			$row.addClass("ImageMarkerTBD");
 			$row.addClass('ui-state-error');
 		}
-		return false; 
-	}); 
+		return false;
+	});
 
 
-}); 
+});
 
 // @hc with additional code from @kongondo
 $(document).ready(function() {
 	$('.marker').draggable({
-		cursorAt: {left: 0, top: 0},
 		containment: '#marker_base_image',// restrict dragging to within the image area only
 		drag: function(e) {
 			removeClass('div');// remove highlight from previously highlighted marker div
@@ -65,7 +64,7 @@ $(document).ready(function() {
 
 			var row = $('tr[data-marker="' + id + '"]');
 			if(row) {
-				removeClass('tr');// remove highlight from previous highlighted row				
+				removeClass('tr');// remove highlight from previous highlighted row
 				row.addClass('highlighted');// highlight table row of current info pages + coordinates
 			}
 		}
@@ -73,7 +72,7 @@ $(document).ready(function() {
 });
 
 /* Highlight corresponding'marker' on click coordinates' table row */
-$(document).ready(function () {      
+$(document).ready(function () {
 	$('tr').click(function (e) {
 		var dm = $(this).attr('data-marker');
 		var d = $('div#' + dm);// current marker div
@@ -86,14 +85,14 @@ $(document).ready(function () {
 				removeClass('tr');// remove highlight from previous highlighted row
 				$(this).addClass('highlighted');// highlight current row
 				d.addClass('highlighted');// highlight corresponding marker div
-			}			
+			}
 		}
 	});
 });
 
 
 /* Highlight corresponding coordinates' table row on 'marker' click */
-$(document).ready(function () {      
+$(document).ready(function () {
 	$('div.marker').click(function (e) {
 		var id = $(this).attr('id');
 		var row = $('tr[data-marker="' + id + '"]');// current row
@@ -106,7 +105,7 @@ $(document).ready(function () {
 				removeClass('div');// remove highlight from previously highlighted marker div ????
 				$(this).addClass('highlighted');// highlight current marker div
 				row.addClass('highlighted');// highlight correspodning row for this marker div
-			}			
+			}
 		}
 	});
 });

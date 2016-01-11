@@ -8,7 +8,7 @@ table.InputfieldImageMarkers {width: 100%;}
 .InputfieldImageMarkers input[type=number],
 .InputfieldImageMarkers input[type=number],
 .InputfieldImageMarkers input[type=text] {
-	width: 100%; 
+	width: 100%;
 }
 
 .InputfieldImageMarkers th,
@@ -47,8 +47,9 @@ div.fieldContainer img {
 }
 
 div.marker span {
+	transform: translate(-50%, -50%);
 	position: absolute;
-	font-size: 1.25em;
+	font-size: 12px;
 	font-weight: bold;
 	color: #FFF;
 	text-align: center;
@@ -58,24 +59,39 @@ div.marker span {
 }
 
 /* marker style: circular */
-div.fieldContainer div.circle {
+div.circle {
 	position: absolute;
-	top: 50%;
-	left: 50%;
-	cursor: move;
+	width: 1px;
+	height: 1px;
+	background: red;
+	z-index: 2;
+	cursor: pointer;
 }
 
-div.fieldContainer div.circle span {
-	left: -10px;
-	top: -10px;
+div.circle::before {
+	content: '';
+	position: absolute;
+	z-index: 2;
+	background: red;
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 20px;
+	transform: translate(-50%, -50%);
+	border: 1px solid rgba(255,255,255,.5);
 	box-sizing: border-box;
+	/*kongondo testing*/
 	width: 2em;
 	height: 2em;
-	border-radius: 100%;
-	background-color: red;
-	border: 2px solid #FFF;
-	line-height: 1em;
-	padding: 0.5em 0;
+}
+
+div.circle.highlighted::before {
+	background: green;
+}
+
+div.circle span {
+	top: 0px;
+	left: 0px;
+	transform: translate(-50%, -50%);
 }
 
 /* marker style: tear drop (gmap) style */
@@ -93,44 +109,61 @@ div.teardrop::before {
 	position: absolute;
 	z-index: 2;
 	background: red;
-	width: 1.563em;
-	height: 1.563em;
+	width: 1.5em;
+	height: 1.5em;
 	border-radius: 20px 20px 20px 0;
-	transform: rotate(-45deg) translate(12px, -29px);
+	transform: rotate(-45deg) translate(14px, -35px);
 	border: 1px solid rgba(255,255,255,.5);
-	box-sizing: border-box;	
+	box-sizing: border-box;
 	/*kongondo testing*/
 	width: 2em;
 	height: 2em;
 }
 
-div.teardrop.active::before {background: green;}
+div.teardrop.highlighted::before {
+	background: green;
+}
 
 div.teardrop span {
 	top: 0px;
 	left: 0px;
-	transform: translate(-50%, -23px);
+	transform: translate(-50%, -31px);
 }
 
 /* marker style: callout */
 div.callout {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	z-index: 2;
+	cursor: pointer;
+}
+
+div.callout span {
 	background: red;
 	line-height: 1.33;
 	max-width: 6em;
 	position: absolute;
-	padding: 0.25em 0.75em;
 	font-weight: bold;
-	transform: translate3d(-50%, -100%, 0);
+	transform: translate3d(-49%, -100%, 0);
 	margin-top: -0.5em;
 	z-index: 2;
-	border: 2px solid #fff;
-	/* @kongondo mods */
+	border: 1px solid rgba(255,255,255,.5);
+	max-width: none;
+	white-space: nowrap;
 	padding: 0.25em 0.35em;
-	width: 2em;
 	height: 2em;
 }
 
-div.callout:before,
+div.callout.highlighted span {
+	background: green;
+}
+
+div.callout.highlighted::after {
+	border-top-color: green;
+}
+
+
 div.callout:after {
 	content: "";
 	border: 0.5em solid transparent;
@@ -138,14 +171,15 @@ div.callout:after {
 	position: absolute;
 	top: 100%;
 	left: 50%;
-  transform: translateX(-50%);
+	transform: translate(-50%, -50%);
 }
 
-div.callout:before {border-top-color: #FFF; margin-top: 2px;}
+div.callout:before {
+	border-top-color: #FFF;
+	margin-top: 2px;
+}
 
 /* ALL marker styles: highlighted markers */
-div.fieldContainer div.highlighted span{
-	border: 2px solid #0A0A0A;
-	background-color: #D1F468;
-	color: #000;
+div.fieldContainer div.highlighted {
+	z-index: 4;
 }
