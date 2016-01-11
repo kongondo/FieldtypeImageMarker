@@ -23,8 +23,6 @@
 *
 */
 
-/* @NOTE: WORK IN PROGRESS */
-
 class FieldtypeImageMarker extends FieldtypeMulti {
 
 	public static function getModuleInfo() {
@@ -323,8 +321,6 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 
 		return parent::getMatchQuery($query, $table, $subfield, $operator, $value); 
 	}
-
-
 
 }
 

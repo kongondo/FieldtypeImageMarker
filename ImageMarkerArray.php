@@ -1,7 +1,5 @@
 <?php
 
-/* @NOTE: WORK IN PROGRESS */
-
 /**
  * Contains multiple ImageMarker objects for a single page
  *

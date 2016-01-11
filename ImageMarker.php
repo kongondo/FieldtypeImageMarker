@@ -1,7 +1,5 @@
 <?php
 
-/* @NOTE: WORK IN PROGRESS */
-
 /**
  * An individual ImageMarker item to be part of an ImageMarkerArray for a Page
  *
@@ -70,10 +68,9 @@ class ImageMarker extends WireData {
 	public function renderImageMarker() {
 		// remember page's output formatting state
 		$of = $this->page->of();
-		// @todo - return page title instead? (i.e. info)
 		// turn on output formatting for our rendering (if it's not already on)
 		if(!$of) $this->page->of(true);
-		$out = "<p><strong>$this->info</strong><br /><em>$this->x</em><br />$this->y</p>";	
+		$out = "<p><strong>Marker Title: $this->infoLabel</strong><br>Marker ID: <em>$this->info</em><br>X-Coordinate: <em>$this->x</em><br>Y-Coordinate: <em>$this->y</em></p>";	
 		if(!$of) $this->page->of(false); 
 		return $out; 
 	}
