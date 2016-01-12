@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 003,
+			'version' => 004,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Input field for ImageMarker.',
 			'requires' => 'FieldtypeImageMarker', 
@@ -165,9 +165,9 @@ class InputfieldImageMarker extends Inputfield {
 		$description = $this->_('Select Pages to add as markers.');		
 		$addInfoPagesSelect = 1;
 
+		// if we are using page autocomplete inputfield to find info pages
 		if ($this->defaultPageSelect == 2) {
-
-				// if we are using page autocomplete inputfield to find info pages
+				
 				$addInfoPages = $this->modules->get('InputfieldPageAutocomplete');
 				$addInfoPages->set('findPagesSelector', $pagesSelector);
 				$addInfoPages->notes = $this->_('Start typing to search for pages.');
@@ -179,7 +179,11 @@ class InputfieldImageMarker extends Inputfield {
 		// else we default to AsmSelect inputfield
 		else {
 				
-				$opts = $this->wire('pages')->find($pagesSelector);
+				// if using custom PHP code to return selectable pages
+				if(strlen($this->findPagesCode)) $opts = $this->findPagesCode();
+				// else we use the default || custom selector
+				else $opts = $this->wire('pages')->find($pagesSelector);
+
 				if(!count($opts)) {
 					$this->error($this->_('Your selector did not find any selectable pages for your markers! Confirm its validity.'));
 					$description = $this->_('No pages were found to add to add as markers. Rectify the specified error first.');
@@ -292,6 +296,33 @@ class InputfieldImageMarker extends Inputfield {
 
 		return true;
 		
+	}
+
+	/**
+	* Find pages to select as markers in AsmSelect using custom PHP code.
+	*
+	* Uses eval().
+	*
+	* @access private
+	* @return eval() of type Page or PageArray or null.
+	*
+	*/
+	private function findPagesCode() {
+
+		$page = $this->page;
+		//so that $page and $pages are locally scoped to the eval
+		$process = $this->wire('process'); 
+		if($process && $process->className() == 'ProcessPageEdit') $page = $process->getPage();
+
+		$pages = $this->wire('pages');
+
+		$findPages = eval($this->findPagesCode);
+
+		//if eval() returns anything other than a Page or PageArray, return error
+		if($findPages instanceof Page ) return $findPages->children;
+		elseif($findPages instanceof PageArray ) return $findPages;
+		else return null;
+
 	}
 
 	/**

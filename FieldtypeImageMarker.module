@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 003,
+			'version' => 004,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Field that stores a table of ImageMarkers for a page.',
 			'installs' => 'InputfieldImageMarker', 
@@ -60,9 +60,6 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		// name of the single file field containing the base image on this page
 		$inputfield->set('baseImageFile', $field->baseImageFile);
 
-		// optional(?) selector for finding info pages
-		$inputfield->set('infoPagesSelector', $field->infoPagesSelector);
-
 		// marker style (shape)
 		$inputfield->set('markerStyle', $field->markerStyle);
 
@@ -77,6 +74,12 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 
 		// default page selector (pagefield)
 		$inputfield->set('defaultPageSelect', $field->defaultPageSelect);
+
+		// optional selector for finding selectable info/marker pages
+		$inputfield->set('infoPagesSelector', $field->infoPagesSelector);
+
+		// optional custom PHP code for finding selectable info/marker pages
+		$inputfield->set('findPagesCode', $field->findPagesCode);
 
 		return $inputfield; 
 	}
@@ -102,31 +105,18 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f = $this->modules->get("InputfieldText");
 		$f->attr('name', 'baseImageFile');
 		$f->attr('value', $field->baseImageFile);
-		$f->label = $this->_('Base Image File Field');
+		$f->label = $this->_('Base image file field');
 		$f->description = $this->_('Enter the name of a file field that contains the base image.');
 		$f->notes = $this->_('The field must be a single file field.');
 		
 		$inputfields->append($f);
 
-		//selector for finding 'column' pages
-		$f = $this->modules->get("InputfieldText");
-		$f->attr('name', 'infoPagesSelector');
-		$f->attr('value', $field->infoPagesSelector);
-		$f->label = $this->_('Info Pages Selector');
-		$f->description = $this->_('Optionally enter a selector to find info pages for image markers.');
-		$f->notes = $this->_('If left blank, all non-admin pages will be returned.');
-		
-		$inputfields->append($f);
-
-		// @todo: php code for finding pages?
-
-		//radios: default marker shape (circle vs teardrop vs callout)
+		// radios: default marker shape (circle vs teardrop vs callout)
 		$f = $this->modules->get('InputfieldRadios');
 		$f->attr('name', 'markerStyle');
 		$f->attr('value', $field->markerStyle ? $field->markerStyle : 1);
-		$f->label =  $this->_('Marker Shape');
 		$f->label =  $this->_('Select a shape for the markers');
-		$f->notes = $this->_('Tear Drop is similar to GMap marker. Callout is rectangular.');
+		$f->notes = $this->_('Tear Drop is similar to GMap markers. Callout is rectangular.');
 
 		$radioOptions = array (
 						1 => $this->_('Circle'),
@@ -142,7 +132,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f = $this->modules->get("InputfieldText");
 		$f->attr('name', 'infoPageLabel');
 		$f->attr('value', $field->infoPageLabel ? $field->infoPageLabel : 'Information Page');
-		$f->label = $this->_('Information Pages Label');
+		$f->label = $this->_('Information pages label');
 		$f->description = $this->_('A label to use in the table header for information pages.');
 
 		$inputfields->append($f);
@@ -151,7 +141,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f = $this->modules->get("InputfieldText");
 		$f->attr('name', 'xCoordinateLabel');
 		$f->attr('value', $field->xCoordinateLabel ? $field->xCoordinateLabel : 'X-Coordinate');
-		$f->label = $this->_('X-Coordinate Label');
+		$f->label = $this->_('X-Coordinate label');
 		$f->description = $this->_('A label to use in the table header for x-coordinate.');
 		
 		$inputfields->append($f);
@@ -160,16 +150,16 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f = $this->modules->get("InputfieldText");
 		$f->attr('name', 'yCoordinateLabel');
 		$f->attr('value', $field->yCoordinateLabel ? $field->yCoordinateLabel : 'Y-Coordinate');
-		$f->label = $this->_('Y-Coordinate Label');
+		$f->label = $this->_('Y-Coordinate label');
 		$f->description = $this->_('A label to use in the table header for y-coordinate.');
 		
 		$inputfields->append($f);
 
-		//radios: default page selector type (autocomplete vs asmselect)
+		// radios: default page selector type (autocomplete vs asmselect)
 		$f = $this->modules->get('InputfieldRadios');
 		$f->attr('name', 'defaultPageSelect');
 		$f->attr('value', $field->defaultPageSelect ? $field->defaultPageSelect : 1);
-		$f->label =  $this->_('Pages Selector');
+		$f->label =  $this->_('Pages selector');
 		$f->label =  $this->_('Choose a method for selecting pages to add as markers');
 		$f->notes = $this->_('If you will have a large selection of pages to choose from, you may want to use Page Auto Complete.');
 
@@ -180,6 +170,27 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 
 		$f->addOptions($radioOptions);
 
+		$inputfields->append($f);
+
+		// selector for finding selectable marker pages
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'infoPagesSelector');
+		$f->attr('value', $field->infoPagesSelector);
+		$f->label = $this->_('Custom information pages selector');
+		$f->description = $this->_('Optionally enter a selector to find information pages for image markers.');
+		$f->notes = $this->_('Example: parent=/products/, template=product, sort=title. If this field is left blank, all non-admin pages will be returned.');
+		
+		$inputfields->append($f);
+
+		// optional input for custom PHP code to find pages to add to AsmSelect
+		$f = $this->modules->get("InputfieldTextarea");
+		$f->attr('name', 'findPagesCode');
+		$f->attr('value', $field->findPagesCode);
+		$f->label = $this->_('Custom PHP Code to find selectable information pages');
+		$f->description = $this->_('Enter valid PHP code to find pages to select as markers. This statement has access to the $page and $pages API variables, where $page refers to the page being edited. The snippet should only return a Page or PageArray. If it returns a Page, children of that Page are used as selectable pages. This overrides anything you set in the above custom selector field. NOTE: This only works with Asm Select.');
+		$f->notes = $this->_('Example: return $page->children("limit=10"); OR return $pages->get(5678);');
+		$f->collapsed = Inputfield::collapsedYes;
+		
 		$inputfields->append($f);
 
 		return $inputfields;
