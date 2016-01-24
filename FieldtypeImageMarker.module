@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 004,
+			'version' => 005,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Field that stores a table of ImageMarkers for a page.',
 			'installs' => 'InputfieldImageMarker', 
@@ -79,9 +79,10 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$inputfield->set('infoPagesSelector', $field->infoPagesSelector);
 
 		// optional custom PHP code for finding selectable info/marker pages
-		$inputfield->set('findPagesCode', $field->findPagesCode);
+		$inputfield->set('findPagesCode', $field->findPagesCode);		
 
-		return $inputfield; 
+		return $inputfield;
+
 	}
 
 	/**
@@ -191,7 +192,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f->notes = $this->_('Example: return $page->children("limit=10"); OR return $pages->get(5678);');
 		$f->collapsed = Inputfield::collapsedYes;
 		
-		$inputfields->append($f);
+		$inputfields->append($f);	
 
 		return $inputfields;
 	}

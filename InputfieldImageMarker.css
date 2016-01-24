@@ -1,7 +1,8 @@
+/* -- COORDINATES' TABLE -- */
 table.InputfieldImageMarkers {width: 100%;}
 .InputfieldImageMarkers table tr {border: none;}
 .InputfieldImageMarkers th {padding-bottom: 0; font-weight: bold;}
-.InputfieldImageMarkers tr:not(.ImageMarkerTBD):hover td {background: #eee;}
+.InputfieldImageMarkers tr:not(.ImageMarkerTBD):hover td {background: #EEE;}
 
 .InputfieldImageMarkers input[type=number],
 .InputfieldImageMarkers input[type=number],
@@ -12,7 +13,7 @@ table.InputfieldImageMarkers {width: 100%;}
 .InputfieldImageMarkers th,
 .InputfieldImageMarkers td {
 	padding: 6px 2px;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #DDD;
 }
 
 .InputfieldImageMarkers .ImageMarkerInfo {width: 45%;}
@@ -27,22 +28,40 @@ tr.highlighted:hover td {background: #93BF0D !important;}
 
 input[type=text].coords_x, input[type=text].coords_y {text-align: right;}
 
+/*@todo/@note: experimental to stop flash of 'long' non-paginated table before pagination kicks in on js-side*/
+table.InputfieldImageMarkers {display: none;}
+
+/* -- Marker table pagination -- */
+
+div.pagination_wrapper {margin: 1em 0;}
+
+span.limit_select {float: right; margin-right: 2em;}
+
+
+div.pager {margin: 1em 0;}
+
+div.pager span {
+	display: inline-block;
+	width: 1.8em;
+	height: 1.8em;
+	line-height: 1.8;
+	text-align: center;
+	cursor: pointer;
+	background: #000;
+	color: #FFF;
+	margin-right: 0.5em;
+}
+
+div.pager span.active {background: #C00;}
+
+
 /* -- MARKER STYLES -- */
 
 /* @hc (circle+teardrop), @tpr(callout), @kongondo (minor mods)*/
 
 /* shared styles */
-div.fieldContainer {
-	position: relative;
-	display: inline-block;
-	border: 2px solid #ccc;
-}
-
-div.fieldContainer img {
-	vertical-align: bottom;
-	width: 100%;
-	height: auto;
-}
+div.fieldContainer {position: relative;	display: inline-block; border: 2px solid #ccc;}
+div.fieldContainer img {vertical-align: bottom;	width: 100%; height: auto;}
 
 div.marker span {
 	transform: translate(-50%, -50%);
@@ -71,26 +90,16 @@ div.circle::before {
 	position: absolute;
 	z-index: 2;
 	background: red;
-	width: 1.5em;
-	height: 1.5em;
 	border-radius: 20px;
 	transform: translate(-50%, -50%);
 	border: 1px solid rgba(255,255,255,.5);
 	box-sizing: border-box;
-	/*kongondo testing*/
 	width: 2em;
 	height: 2em;
 }
 
-div.circle.highlighted::before {
-	background: green;
-}
-
-div.circle span {
-	top: 0px;
-	left: 0px;
-	transform: translate(-50%, -50%);
-}
+div.circle.highlighted::before {background: green;}
+div.circle span {top: 0px; left: 0px; transform: translate(-50%, -50%);}
 
 /* marker style: tear drop (gmap) style */
 div.teardrop {
@@ -107,26 +116,16 @@ div.teardrop::before {
 	position: absolute;
 	z-index: 2;
 	background: red;
-	width: 1.5em;
-	height: 1.5em;
 	border-radius: 20px 20px 20px 0;
 	transform: rotate(-45deg) translate(14px, -35px);
 	border: 1px solid rgba(255,255,255,.5);
 	box-sizing: border-box;
-	/*kongondo testing*/
 	width: 2em;
 	height: 2em;
 }
 
-div.teardrop.highlighted::before {
-	background: green;
-}
-
-div.teardrop span {
-	top: 0px;
-	left: 0px;
-	transform: translate(-50%, -31px);
-}
+div.teardrop.highlighted::before {background: green;}
+div.teardrop span {top: 0px; left: 0px;	transform: translate(-50%, -31px);}
 
 /* marker style: callout */
 div.callout {
@@ -153,13 +152,8 @@ div.callout span {
 	height: 2em;
 }
 
-div.callout.highlighted span {
-	background: green;
-}
-
-div.callout.highlighted::after {
-	border-top-color: green;
-}
+div.callout.highlighted span {background: green;}
+div.callout.highlighted::after {border-top-color: green;}
 
 
 div.callout:after {
@@ -172,12 +166,7 @@ div.callout:after {
 	transform: translate(-50%, -50%);
 }
 
-div.callout:before {
-	border-top-color: #FFF;
-	margin-top: 2px;
-}
+div.callout:before {border-top-color: #FFF;	margin-top: 2px;}
 
 /* ALL marker styles: highlighted markers */
-div.fieldContainer div.highlighted {
-	z-index: 4;
-}
+div.fieldContainer div.highlighted {z-index: 4;}

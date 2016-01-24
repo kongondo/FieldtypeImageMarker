@@ -8,10 +8,65 @@ $(document).ready(function() {
 	   $(elem).removeClass('highlighted');
 	}
 
+	// function to set cookie to remember last select for number of rows to show in coordinates' table per pagination
+	setCookie = function (key, value) {
+			document.cookie = key + '=' + value + ';expires=0';
+	}
+
+	// function to get cookie about last select for number of rows to show in coordinates' table per pagination
+	getCookie = function (key) {
+			var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+			return keyValue ? keyValue[2] : null;
+	}
+
+	paginateTable = function(numPerPage){
+
+		// @ Original code by: Gabriele Romanato http://gabrieleromanato.name/jquery-easy-table-pagination/
+		// @ Modified by Francis Otieno (Kongondo) for the ProcessWire Module InputfieldImageMarker
+
+		if($('div.pager')) $('div.pager').remove();// remove last inserted pagination to avoid duplicates (.ready vs .change)
+
+		$('table.InputfieldImageMarkers').each(function() {
+		
+			var $table = $(this);
+			var currentPage = 0;
+			// if not paginating, show whole table then return to avoid recursion error
+			if(numPerPage == 0) {
+				$table.find('tbody tr').show();
+				return;
+			}
+
+			$table.bind('repaginate', function() {
+				$table.find('tbody tr').hide().slice(currentPage * numPerPage, (currentPage + 1) * numPerPage).show();
+			});
+			$table.trigger('repaginate');
+			var numRows = $table.find('tbody tr').length;
+
+			if(numRows <= numPerPage) return;// if only 1 page, no need to show pagination
+
+			var numPages = Math.ceil(numRows / numPerPage);
+			var $pager = $('<div class="pager"></div>');
+			for (var page = 0; page < numPages; page++) {
+				$('<span class="page-number"></span>').text(page + 1).bind('click', {
+				newPage: page
+				}, function(event) {
+					currentPage = event.data['newPage'];
+					$table.trigger('repaginate');
+					$(this).addClass('active').siblings().removeClass('active');
+				}).appendTo($pager).addClass('clickable');
+			}// end for loop
+			$pager.appendTo($('div.pagination_wrapper')).find('span.page-number:first').addClass('active');	
+
+		});	
+
+	};
+
 	/*************************************************************/
 	// GLOBALS
-	w = $('div.fieldContainer').width();
-	h = $('div.fieldContainer').height();
+	w = $('div.fieldContainer').width();//@todo: doesn't work in IE (needs innerWidth)
+	h = $('div.fieldContainer').height();// @todo: ditto
+	numPerPage = 0;// number of rows per page in paginated coordinates' table
+	
 
 });
 
@@ -89,7 +144,6 @@ $(document).ready(function () {
 	});
 });
 
-
 /* Highlight corresponding coordinates' table row on 'marker' click */
 $(document).ready(function () {
 	$('div.marker').click(function (e) {
@@ -113,3 +167,72 @@ $(document).ready(function () {
 $(document).ready(function() {
 	$(document).tooltip();
 });
+
+/* coordinates' table pagination */
+// @todo: clicking on out-of-view 'marker' on the base image should display the correct page table (if pagination is on)
+$(document).ready(function() {
+	// on load pagination
+	limit = $('#limit');
+	var v = limit.val();
+	setCookie('coordinatesTableRows', v);// what's currently selected in select for coordinates' table pagination control
+	if(v === 'All') v = 0;
+	numPerPage = v;	
+	paginateTable(numPerPage);
+	/*@todo: experimental to stop flash of 'long' non-paginated table before pagination kicks in on js-side*/
+	$("table.InputfieldImageMarkers").show();
+	
+	// on select change, repaginate
+	limit.on('change', function(){
+		numPerPage = limit.val();
+		if(numPerPage === 'All') numPerPage = 0;
+		setCookie('coordinatesTableRows', limit.val());
+		paginateTable(numPerPage);
+	});
+});
+
+/* disable selection of marker pages already in coordinates' table */
+//
+
+$(document).ready(function () {
+
+	// get all IDs of marker pages already in coordinates' table
+	var allSelected = $("table.InputfieldImageMarkers input.marker_info").map(function () {
+		return $(this).val();
+	}).get();
+
+	// get all available marker pages options in asmSelect
+	var allOptions = $("#marker_add_infopages option").map(function () {return $(this).val();
+	}).get();     
+
+	// in the marker pages asmSelect, specify as 'selected' (hence disabled [via asmSelect])
+	// all marker pages that are already in coordinates table
+	// comparison is by ID, hence foolproof
+	// 'selected' attributed will make asmSelect display the <ol> list of already selected pages below the select
+	// this is not desirable in our case. We remove the list after this (see below)
+	$("#marker_add_infopages option:not(:selected):not([value='0'])").each(function () {
+		if ($.inArray($(this).val(), allSelected) != -1) $(this).attr('selected', true);
+		// @note: this will cause newly deleted items to be sent also as newly added since in $this, they will be marked as 'selected'
+		// we deal with that server-side
+	});
+
+});
+
+/* remove list of selected pages in ordered list in asmSelect */
+// this works in conjuction with above
+// @note: may not work in some (older) browsers
+$(document).on('DOMNodeInserted', function(e) {
+    if ($(e.target).is('#wrap_marker_add_infopages #asmList0')) {
+       //element with #xxx was inserted.
+       var asmOList = ($(e.target));// asmSelect ordered list of selected items
+       //asmOList.children().addClass('hidden_lists');
+       //asmOList.children().hide();       
+       // fastest just to remove them @note: this doesn't affect new items being added
+       asmOList.children().remove();
+    }
+
+});
+
+
+
+
+

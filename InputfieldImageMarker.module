@@ -29,15 +29,26 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 004,
+			'version' => 005,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Input field for ImageMarker.',
 			'requires' => 'FieldtypeImageMarker', 
 			);
 	}
 
+	/**
+	 * string name of the cookie used to save total number of coordinates' table rows to show per page when pagination in use.
+	 *
+	 */
+	private $cookieName;
+
+	/**
+	 * int value of number of coordinates' table rows to show per page when pagination in use.
+	 *
+	 */
+
 	protected $page;
-	protected $field; 
+	protected $field;
 
 	public function setPage(Page $page) {
 		$this->page = $page; 
@@ -65,7 +76,7 @@ class InputfieldImageMarker extends Inputfield {
 		$out = "
 			<tr class='ImageMarker$cnt $class' data-marker='marker_{$info}'>
 				<td>
-					<input type='hidden' name='{$name}_info[]' value='$info'>
+					<input type='hidden' name='{$name}_info[]' class='marker_info' value='$info'>
 					<span>$i $label</span>
 				</td>
 				<td><input type='text' name='{$name}_x[]' value='$x' class='coords_x' data-marker='marker_{$info}_x'></td>
@@ -85,6 +96,8 @@ class InputfieldImageMarker extends Inputfield {
 	 *
 	 */
 	public function ___render() {
+
+
 
 		// name of the single file field containing the base image on this page
 		// the class property was set in FieldtypeImageMarker getInputfield()
@@ -127,6 +140,7 @@ class InputfieldImageMarker extends Inputfield {
 		$out .= '</div>';// end div.fieldContainer
 
 		$out .= $this->renderPageSelect();
+		$out .= $this->coordinatesTablePaginationSelect();
 
 		$out .= "
 		<table class='InputfieldImageMarkers'>
@@ -326,6 +340,47 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
+	* Determines and sets the user-selected numbere of rows per page in paginated coordinates' table.
+	*
+	* Gets cookie set in js.
+	*
+	* @access private
+	* @return string|int $showRows pre-selection for select controlling number of rows per page in paginated coordinates' table.
+	*
+	*/
+	private function coordinatesTablePaginationLimit() {
+		$showRows = $this->input->cookie->coordinatesTableRows;// js cookie to remember last selected for session
+		return $showRows;		
+	}
+
+	/**
+	* SeleReturn number of coordinates' table rows to show per page when using pagination.
+	*
+	* @access private
+	* @return string $limitSelect Markup for selecting number of table rows to display per page in pagination mode.
+	*
+	*/
+	private function coordinatesTablePaginationSelect() {
+
+		$lastLimit = $this->coordinatesTablePaginationLimit();
+
+		// prepare values for 'Show XX Posts', i.e. number of posts to show per page in posts dashboard
+		$limitSelect = '';
+		$limitSelect .= '<div class="pagination_wrapper"><span class="limit_select">' . $this->_('Show ') . '<select id="limit" name="show_limit">';
+
+		$limits = array( 'All', 5, 10, 15, 25, 50, 75, 100);
+
+		foreach ($limits as $limit) {					
+					$limitSelect .='<option value="' . $limit . '"' . ($lastLimit == $limit ? 'selected="selected"' : '') . '>' . $limit . '</option>';
+		}
+
+		$limitSelect .= '</select>'. $this->_(' Rows') . '</span></div>';
+
+		return $limitSelect;
+
+	}
+
+	/**
 	 * Process input for the ImageMarkers inputs
 	 *
 	 */
@@ -339,6 +394,7 @@ class InputfieldImageMarker extends Inputfield {
 		$ImageMarkers = $this->field->type->getBlankValue($this->page, $this->field); 
 		$numDeleted = 0; 
 		$duplicates = array();// to help remove duplicate info pages
+		$deleted = array();// due to some js issues, to help remove deleted from being re-added as new items
 
 		// first we process existing values
 		// foreach($input->{"{$name}_info"} as $cnt => $info) {
@@ -348,7 +404,8 @@ class InputfieldImageMarker extends Inputfield {
 			if($input->{"{$name}_del"}[$cnt]) {
 				// if being deleted, then we simply skip over it
 				$numDeleted++;
-				continue; 
+				$deleted[] = $info;
+				continue;				
 			}
 
 			if(in_array($info, $duplicates)) continue;// skip duplicate info pages
@@ -369,17 +426,14 @@ class InputfieldImageMarker extends Inputfield {
 
 		// if using PageAutocomplete to add info pages
 		if($addInfoPagesSelect == 2) {
-
 			// In the autocomplete select array, there is only one index with a string of numbers, e.g. ,1087,1364,7895 as a value
 			$addPages = explode(",", $addPages[0]);
 			// we remove the first item in the array since it will be an empty string.
 			array_splice($addPages, 0, 1);
 		}
 
-
 		foreach ($addPages as $p) {
-
-			if(in_array($p, $duplicates)) continue;// skip duplicate info pages
+			if(in_array($p, $duplicates) || in_array($p, $deleted)) continue;// skip duplicate info pages + those being deleted
 
 			// create the $ImageMarker and add it to our $ImageMarkers
 			$ImageMarker = new ImageMarker();
@@ -390,7 +444,6 @@ class InputfieldImageMarker extends Inputfield {
 
 			$duplicates[] = $p;
 		}
-
 
 		################
 
