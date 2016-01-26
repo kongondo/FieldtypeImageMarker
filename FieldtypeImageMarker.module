@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 005,
+			'version' => 006,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Field that stores a table of ImageMarkers for a page.',
 			'installs' => 'InputfieldImageMarker', 

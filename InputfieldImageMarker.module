@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 005,
+			'version' => 006,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'summary' => 'Input field for ImageMarker.',
 			'requires' => 'FieldtypeImageMarker', 
@@ -252,7 +252,7 @@ class InputfieldImageMarker extends Inputfield {
 			$markerLabel = $im->infoLabel;
 		}
 
-		$out = '<div id="marker_' . $im->info .'" class="marker '. $markerStyleClass .'" title="'. $im->infoLabel .'" style="left: '. $im->x. '%; top: '. $im->y .'%;">' .
+		$out = '<div id="marker_'.$im->info.'" class="marker '.$markerStyleClass.'" title="'.$im->infoLabel.'" style="left: '.$im->x. '%; top: '.$im->y.'%;" data-row="'.$i.'">' .
 					'<span>' . $markerLabel . '</span>' .
 				'</div>';
 

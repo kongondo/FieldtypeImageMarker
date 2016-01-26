@@ -28,16 +28,13 @@ tr.highlighted:hover td {background: #93BF0D !important;}
 
 input[type=text].coords_x, input[type=text].coords_y {text-align: right;}
 
-/*@todo/@note: experimental to stop flash of 'long' non-paginated table before pagination kicks in on js-side*/
+/* @note: to stop flash of 'long' non-paginated table before pagination kicks in on js-side (we show table using js) */
 table.InputfieldImageMarkers {display: none;}
 
 /* -- Marker table pagination -- */
 
 div.pagination_wrapper {margin: 1em 0;}
-
 span.limit_select {float: right; margin-right: 2em;}
-
-
 div.pager {margin: 1em 0;}
 
 div.pager span {
@@ -154,7 +151,6 @@ div.callout span {
 
 div.callout.highlighted span {background: green;}
 div.callout.highlighted::after {border-top-color: green;}
-
 
 div.callout:after {
 	content: "";

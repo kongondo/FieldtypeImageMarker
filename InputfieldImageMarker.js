@@ -10,14 +10,31 @@ $(document).ready(function() {
 
 	// function to set cookie to remember last select for number of rows to show in coordinates' table per pagination
 	setCookie = function (key, value) {
-			document.cookie = key + '=' + value + ';expires=0';
+		document.cookie = key + '=' + value + ';expires=0';
 	}
 
 	// function to get cookie about last select for number of rows to show in coordinates' table per pagination
 	getCookie = function (key) {
-			var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
-			return keyValue ? keyValue[2] : null;
+		var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+		return keyValue ? keyValue[2] : null;
 	}
+
+	getMarkerPage = function(row) {
+		var pages = $('span.page-number[data-first-row]');
+		// if no pagination, return
+		if(pages.length === 0) return;
+		var pageNums = $(pages).filter(function () {
+		    				return $(this).data('first-row') > row;
+						});
+		// get the first page whose first row is greater than the row we want
+		// our row will be the first previous page to this one
+		var markerPage = pageNums.first().prev(); 
+		// if we did not get a marker page, it means our row is on the last page, so we grab the last page
+		if(markerPage.length === 0) markerPage = pages.last();
+		// if our row is already on the current page, we do nothing, else we click our row's page number
+		if(!markerPage.hasClass('active')) markerPage.click();
+	}
+
 
 	paginateTable = function(numPerPage){
 
@@ -47,7 +64,9 @@ $(document).ready(function() {
 			var numPages = Math.ceil(numRows / numPerPage);
 			var $pager = $('<div class="pager"></div>');
 			for (var page = 0; page < numPages; page++) {
-				$('<span class="page-number"></span>').text(page + 1).bind('click', {
+				var lastRow = (page + 1) * numPerPage;// we need this for 'on click marker, show its page'
+				var firstRow = (lastRow - numPerPage) + 1;// ditto
+				$('<span class="page-number" data-first-row="' + firstRow + '"></span>').text(page + 1).bind('click', {
 				newPage: page
 				}, function(event) {
 					currentPage = event.data['newPage'];
@@ -65,8 +84,7 @@ $(document).ready(function() {
 	// GLOBALS
 	w = $('div.fieldContainer').width();//@todo: doesn't work in IE (needs innerWidth)
 	h = $('div.fieldContainer').height();// @todo: ditto
-	numPerPage = 0;// number of rows per page in paginated coordinates' table
-	
+	numPerPage = 0;// number of rows per page in paginated coordinates' table	
 
 });
 
@@ -148,6 +166,7 @@ $(document).ready(function () {
 $(document).ready(function () {
 	$('div.marker').click(function (e) {
 		var id = $(this).attr('id');
+		var dataRow = $(this).attr('data-row');
 		var row = $('tr[data-marker="' + id + '"]');// current row
 		if(row) {
 			removeClass('tr');// remove highlight from previous highlighted row
@@ -155,10 +174,13 @@ $(document).ready(function () {
 				$(this).removeClass('highlighted');
 			}
 			else {
-				removeClass('div');// remove highlight from previously highlighted marker div ????
+				removeClass('div');// remove highlight from previously highlighted marker div
 				$(this).addClass('highlighted');// highlight current marker div
 				row.addClass('highlighted');// highlight correspodning row for this marker div
 			}
+		
+			// if necessary, on click marker, jump to its page in a paginated coordinates' table
+			getMarkerPage(dataRow);
 		}
 	});
 });
@@ -169,7 +191,6 @@ $(document).ready(function() {
 });
 
 /* coordinates' table pagination */
-// @todo: clicking on out-of-view 'marker' on the base image should display the correct page table (if pagination is on)
 $(document).ready(function() {
 	// on load pagination
 	limit = $('#limit');
@@ -178,7 +199,7 @@ $(document).ready(function() {
 	if(v === 'All') v = 0;
 	numPerPage = v;	
 	paginateTable(numPerPage);
-	/*@todo: experimental to stop flash of 'long' non-paginated table before pagination kicks in on js-side*/
+	/* @note: to stop flash of 'long' non-paginated table before pagination kicks in here (table is initally hidden using css) */
 	$("table.InputfieldImageMarkers").show();
 	
 	// on select change, repaginate
@@ -231,8 +252,6 @@ $(document).on('DOMNodeInserted', function(e) {
     }
 
 });
-
-
 
 
 
