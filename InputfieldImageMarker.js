@@ -24,7 +24,7 @@ $(document).ready(function() {
 		// if no pagination, return
 		if(pages.length === 0) return;
 		var pageNums = $(pages).filter(function () {
-		    				return $(this).data('first-row') > row;
+							return $(this).data('first-row') > row;
 						});
 		// get the first page whose first row is greater than the row we want
 		// our row will be the first previous page to this one

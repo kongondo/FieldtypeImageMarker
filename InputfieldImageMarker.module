@@ -244,15 +244,17 @@ class InputfieldImageMarker extends Inputfield {
 		$i = $cnt + 1;
 		$markerStyle = $this->markerStyle;			
 		$markerLabel = $i;
+		$title = $im->infoLabel;
 
 		if($markerStyle == 1) $markerStyleClass = 'circle';
 		elseif($markerStyle == 2) $markerStyleClass = 'teardrop';
 		elseif($markerStyle == 3) {
 			$markerStyleClass = 'callout';
 			$markerLabel = $im->infoLabel;
+			$title = $i;
 		}
 
-		$out = '<div id="marker_'.$im->info.'" class="marker '.$markerStyleClass.'" title="'.$im->infoLabel.'" style="left: '.$im->x. '%; top: '.$im->y.'%;" data-row="'.$i.'">' .
+		$out = '<div id="marker_'.$im->info.'" class="marker '.$markerStyleClass.'" title="'.$title.'" style="left: '.$im->x. '%; top: '.$im->y.'%;" data-row="'.$i.'">' .
 					'<span>' . $markerLabel . '</span>' .
 				'</div>';
 
