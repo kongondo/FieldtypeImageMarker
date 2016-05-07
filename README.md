@@ -108,4 +108,5 @@ Released under the [MIT license](http://www.opensource.org/licenses/MIT):
 
 ## Credits
 Helder Cervantes: Co-author InputfieldImageMarker
+
 Roland Toth: HTML & CSS in InputfieldImageMarker
