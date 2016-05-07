@@ -252,7 +252,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 
 		// if we are given something other than an ImageMarkerArray, 
 		// then just return a blank array
-		if(!$value instanceof ImageMarkerArray) return $sleepValue; 
+		if(!$value instanceof ImageMarkerArray) return $sleepValue;
 
 		// make the ImageMarkers sort by sort ascending
 		$value->sort('sort'); 

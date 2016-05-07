@@ -421,7 +421,7 @@ class InputfieldImageMarker extends Inputfield {
 
 			$duplicates[] = $info;
 		}
-
+		
 		// second, we process newly added markers
 		$addPages = $this->input->post->marker_add_infopages;
 		$addInfoPagesSelect = $this->input->post->marker_add_infopages_select;// determine if using PageAutocomplete vs AsmSelect
