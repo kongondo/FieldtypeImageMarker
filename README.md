@@ -12,7 +12,7 @@ The module is useful for a diverse number of uses including:
 2. Office locations: place markers on a map showing global offices of a multinational company
 3. Points-of-Interest: place markers showing points of interest on a map or location or anything.
 
-The coordinates are saved as percentages. This means they will scale well with the image being referenced.
+The coordinates are saved as percentages. This means they will scale well with the image being marked.
 
 <img src='https://github.com/kongondo/FieldtypeImageMarker/raw/master/screenshot1.png' />
 
