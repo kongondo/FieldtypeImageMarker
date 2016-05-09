@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 006,
+			'version' => 007,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'ImageMarker: Field that stores a table of ImageMarker coordinates for a page.',
@@ -224,7 +224,8 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 			$ImageMarker = new ImageMarker();
 			$p = $this->wire('pages')->get($v['data']);
 			if(!$p || !$p->id > 0)  continue;
-			// @todo - grab page object here? + can then create a new property with the page object. No, for now. User to grab page in template file
+			// @todo - grab page object here? + can then create a new property with the page object.
+			// No, for now (potential performance issues). User to grab page in template file
 			$ImageMarker->info = $v['data']; // note we're converting 'data' to 'info'
 			$ImageMarker->x = $v['x']; 
 			$ImageMarker->y = $v['y'];

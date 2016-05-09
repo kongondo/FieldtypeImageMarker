@@ -84,6 +84,9 @@ Uninstall like any other third-party ProcessWire module.
 [Support forum](https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/).
 
 ## Changelog
+#### Version 007
+1. Coordinates' table now manually sortable.
+
 #### Version 006
 1. On a paginated coordinates' table, clicking on a marker will, where necessary, bring its page into view.
 

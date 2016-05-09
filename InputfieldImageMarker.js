@@ -212,8 +212,6 @@ $(document).ready(function() {
 });
 
 /* disable selection of marker pages already in coordinates' table */
-//
-
 $(document).ready(function () {
 
 	// get all IDs of marker pages already in coordinates' table
@@ -252,6 +250,26 @@ $(document).on('DOMNodeInserted', function(e) {
     }
 
 });
+
+/* sortable table of coordinates */
+// + fixed width fix
+// + @credits: https://paulund.co.uk/fixed-width-sortable-tables
+$(document).ready(function() {
+	$('table.sortable tbody').sortable({
+		containment: 'parent',
+		helper: fixWidthHelper
+	}).disableSelection();
+
+	// fixed width solution
+	function fixWidthHelper(e, ui) {
+		ui.children().each(function() {
+			$(this).width($(this).width());
+		});
+		return ui;
+	}
+});
+
+
 
 
 

@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 006,
+			'version' => 007,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'Image Marker: GUI (Inputfield) for FieldtypeImageMarker.',
@@ -144,7 +144,7 @@ class InputfieldImageMarker extends Inputfield {
 		$out .= $this->coordinatesTablePaginationSelect();
 
 		$out .= "
-		<table class='InputfieldImageMarkers'>
+		<table class='InputfieldImageMarkers sortable'>
 			<thead>
 			<tr class=''>
 				<th class='ImageMarkerInfo'>" . $infoPageLabel . "</th>
