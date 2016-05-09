@@ -44,12 +44,13 @@ Install like any other ProcessWire module. If you cannot install via the modules
 
 ## How to Use
 -  Edit a page using the template you added the _marker_ field to.
-- Add as many page markers as you want to your base image. You will not see their markers until you hit save. Go ahead and save.
+- Add as many page markers as you want to your base image. You will not see their markers until you hit **save**. Go ahead and save the page.
 - Newly added markers are initially placed at 0,0 (top left) of your base image. Drag each to its desired position. Note that a selected marker is green in colour. All other markers are red.
 - Click the save button to save the markers in their new coordinates.
 - Notice the table of coordinates below the base image. The first column shows the marker number and the title of the ProcessWire page referenced by the coordinates. In the second and third columns, note how the x and y coordinates change in real time as you drag each marker respective marker. Also notice that the row of the table corresponding to the selected marker is highlighted. The row number also matches the marker number (if using Circular and Tear Drop. If using Callout, the page title is displayed instead on the marker).
 - You can also use the table to select and directly edit the coordinates of a marker. Click on a table row. Notice that its corresponding marker is now highlighted. Enter a number between 0 - 100 in either/each of the x and y coordinates input. Hit save. The marker moves to its new position.
 - In case you have lots of markers you can use the inbuilt pagination (see top right of coordinates table) to limit the number shown per paginated table page. 
+- To sort the markers in the coordinates table, simply drag (anchor using the title [first] column) the row to desired position and save.
 - To delete all markers click on the trash icon at the top right of the coordinates. All table rows (even the ones not currently visible if you are viewing a paginated table) are marked in red (except for current active row which is still highlighted in green) and their coordinates crossed out. Click save to confirm. All the markers are deleted. If you change your mind before saving, click on the trash icon again to toggle deselection.
 - To delete individual markers just click on the trash icon to the right of the respective row and hit save. Toggle click to deselect.
 
