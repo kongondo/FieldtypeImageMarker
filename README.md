@@ -2,7 +2,7 @@
 
 ## About
 
-This module allows you to easily 'place markers' on an image. Each placed marker's position/coordinates (x and y) are saved in the field as well as the ID of the ProcessWire page the marker refers to.
+This module allows you to easily 'place markers' (**hotspots**) on an image. Each placed marker's position/coordinates (x and y) are saved in the field as well as the ID of the ProcessWire page the marker refers to.
 
 In the backend markers are placed on a specified base image. In the frontend, using each saved page ID you can then retrieve any information you want about the pages being referenced and display that on your website over the same base image you used in the backend.
 
