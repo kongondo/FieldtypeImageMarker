@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 007,
+			'version' => 008,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'ImageMarker: Field that stores a table of ImageMarker coordinates for a page.',

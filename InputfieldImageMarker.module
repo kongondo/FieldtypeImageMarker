@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 007,
+			'version' => 008,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'Image Marker: GUI (Inputfield) for FieldtypeImageMarker.',
@@ -397,32 +397,32 @@ class InputfieldImageMarker extends Inputfield {
 		$ImageMarkers = $this->field->type->getBlankValue($this->page, $this->field); 
 		$numDeleted = 0; 
 		$duplicates = array();// to help remove duplicate info pages
-		$deleted = array();// due to some js issues, to help remove deleted from being re-added as new items
+		$deleted = array();// due to some js issues, to help remove deleted from being re-added as new items		
 
-		// first we process existing values
-		// foreach($input->{"{$name}_info"} as $cnt => $info) {
-		foreach($input->{"{$name}_info"} as $cnt => $info) {
+		// first we process existing values but first check if there's anything to process
+		if(is_array($input->{"{$name}_info"}) && count($input->{"{$name}_info"})) {
+			foreach($input->{"{$name}_info"} as $cnt => $info) {
 
-			// check if the item is being deleted
-			if($input->{"{$name}_del"}[$cnt]) {
-				// if being deleted, then we simply skip over it
-				$numDeleted++;
-				$deleted[] = $info;
-				continue;				
+				// check if the item is being deleted
+				if($input->{"{$name}_del"}[$cnt]) {
+					// if being deleted, then we simply skip over it
+					$numDeleted++;
+					$deleted[] = $info;
+					continue;				
+				}
+
+				if(in_array($info, $duplicates)) continue;// skip duplicate info pages
+
+				// create the $ImageMarker and add it to our $ImageMarkers
+				$ImageMarker = new ImageMarker();
+				$ImageMarker->info = $info; 
+				$ImageMarker->x = $input->{"{$name}_x"}[$cnt];
+				$ImageMarker->y = $input->{"{$name}_y"}[$cnt];
+				$ImageMarkers->add($ImageMarker);
+
+				$duplicates[] = $info;
 			}
-
-			if(in_array($info, $duplicates)) continue;// skip duplicate info pages
-
-			// create the $ImageMarker and add it to our $ImageMarkers
-			$ImageMarker = new ImageMarker();
-			$ImageMarker->info = $info; 
-			$ImageMarker->x = $input->{"{$name}_x"}[$cnt];
-			$ImageMarker->y = $input->{"{$name}_y"}[$cnt];
-			$ImageMarkers->add($ImageMarker);
-
-			$duplicates[] = $info;
 		}
-		
 		// second, we process newly added markers
 		$addPages = $this->input->post->marker_add_infopages;
 		$addInfoPagesSelect = $this->input->post->marker_add_infopages_select;// determine if using PageAutocomplete vs AsmSelect
@@ -434,18 +434,23 @@ class InputfieldImageMarker extends Inputfield {
 			// we remove the first item in the array since it will be an empty string.
 			array_splice($addPages, 0, 1);
 		}
+		
+		// check if we have anything to process
+		if(is_array($addPages) && count($addPages)) {
+			foreach ($addPages as $p) {
+				
+				// skip duplicate info pages + those being deleted
+				if(in_array($p, $duplicates) || in_array($p, $deleted)) continue;
 
-		foreach ($addPages as $p) {
-			if(in_array($p, $duplicates) || in_array($p, $deleted)) continue;// skip duplicate info pages + those being deleted
+				// create the $ImageMarker and add it to our $ImageMarkers
+				$ImageMarker = new ImageMarker();
+				$ImageMarker->info = $p; 
+				$ImageMarker->x = '';// set to nothing since new
+				$ImageMarker->y = '';// ditto
+				$ImageMarkers->add($ImageMarker);
 
-			// create the $ImageMarker and add it to our $ImageMarkers
-			$ImageMarker = new ImageMarker();
-			$ImageMarker->info = $p; 
-			$ImageMarker->x = '';// set to nothing since new
-			$ImageMarker->y = '';// ditto
-			$ImageMarkers->add($ImageMarker);
-
-			$duplicates[] = $p;
+				$duplicates[] = $p;
+			}
 		}
 
 		################

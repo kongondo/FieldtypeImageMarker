@@ -85,6 +85,10 @@ Uninstall like any other third-party ProcessWire module.
 [Support forum](https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/).
 
 ## Changelog
+
+#### Version 008
+1. Fixed a couple of minor bugs ('invalid' PHP warnings).
+
 #### Version 007
 1. Coordinates' table now manually sortable.
 
