@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 8,
+			'version' => 9,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'Image Marker: GUI (Inputfield) for FieldtypeImageMarker.',
@@ -98,15 +98,22 @@ class InputfieldImageMarker extends Inputfield {
 	 */
 	public function ___render() {
 
-
+		$out = '';
 
 		// name of the single file field containing the base image on this page
 		// the class property was set in FieldtypeImageMarker getInputfield()
 		$baseImageFile = $this->baseImageFile;
 
 		// check if a valid file field was specified + if it is not empty
-		$validBaseFile = $this->isValid($baseImageFile);
-		if((int) $validBaseFile !== 1) return $this->field->error($this->_($validBaseFile));
+		$valid = $this->isValid($baseImageFile);// returns array
+		$validBaseFile = (int) $valid['valid'];
+		// no field specified, field not found or field of wrong type
+		if($validBaseFile === 0) return $this->field->error($valid['error']);
+		// empty file field
+		elseif($validBaseFile === -1) {
+			$out = '<h4>'.  $this->_('Base image not found. Please upload one and save the page in order to use this field.') . '</h4>';
+			return $out;
+		}
 
 		// optional(?) selector for finding info pages
 		$infoPagesSelector = $this->infoPagesSelector;// this property was set in FieldtypeImageMarker getInputfield()
@@ -120,7 +127,7 @@ class InputfieldImageMarker extends Inputfield {
 		$xLabel = $this->xCoordinateLabel ? $this->xCoordinateLabel : $this->_('X-Coordinate');
 		$yLabel = $this->yCoordinateLabel ? $this->yCoordinateLabel : $this->_('Y-Coordinate');
 
-		$out ='';
+		#$out ='';
 		
 		// base image + markers markup
 		$out = '<div class="fieldContainer">';
@@ -291,7 +298,11 @@ class InputfieldImageMarker extends Inputfield {
 	 */
 	private function isValid($field = '') {
 
-		$error = '';
+		$valid = array();
+		$error = '';		
+
+		$valid['valid'] = 1;
+		$valid['error'] = $error;
 
         // name of the single file field containing the base image on this page
 		if(!$field) $error = $this->_('You have to specify a valid file field with a base image');
@@ -305,13 +316,16 @@ class InputfieldImageMarker extends Inputfield {
 			
 			if(!$f || !$f->id > 0)  $error = $this->_('The specified file field does not exist!');// no field
 			elseif (!$f->type instanceof FieldtypeFile) $error = $this->_('The specified field is not valid. You need to specify the name of a file field.');// wrong field type
-			elseif($page->$f->count < 1) $error = $this->_('You have to upload a base image to your specified file field!');// empty file field
-
+			elseif($page->$f->count < 1) $valid['valid'] = -1;
+			
 		}
 
-		if($error) return $error;
+		if($error) {
+			$valid['valid'] = 0;
+			$valid['error'] = $error;
+		}
 
-		return true;
+		return $valid;
 		
 	}
 
@@ -335,7 +349,7 @@ class InputfieldImageMarker extends Inputfield {
 
 		$findPages = eval($this->findPagesCode);
 
-		//if eval() returns anything other than a Page or PageArray, return error
+		//if eval() returns anything other than a Page or PageArray, return null
 		if($findPages instanceof Page ) return $findPages->children;
 		elseif($findPages instanceof PageArray ) return $findPages;
 		else return null;
@@ -357,7 +371,7 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
-	* SeleReturn number of coordinates' table rows to show per page when using pagination.
+	* Return number of coordinates' table rows to show per page when using pagination.
 	*
 	* @access private
 	* @return string $limitSelect Markup for selecting number of table rows to display per page in pagination mode.

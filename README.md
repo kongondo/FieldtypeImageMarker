@@ -85,6 +85,9 @@ Uninstall like any other third-party ProcessWire module.
 
 ## Changelog
 
+#### Version 009
+1. If base image field empty, render relevant message rather than show field error. Allows for intentionally leaving base image field blank.
+
 #### Version 008
 1. Fixed a couple of minor bugs ('invalid' PHP warnings).
 
