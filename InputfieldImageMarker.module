@@ -126,9 +126,7 @@ class InputfieldImageMarker extends Inputfield {
 		// horizontal and vertical axes labels (x and y respectively)
 		$xLabel = $this->xCoordinateLabel ? $this->xCoordinateLabel : $this->_('X-Coordinate');
 		$yLabel = $this->yCoordinateLabel ? $this->yCoordinateLabel : $this->_('Y-Coordinate');
-
-		#$out ='';
-		
+	
 		// base image + markers markup
 		$out = '<div class="fieldContainer">';
 		$out .= $this->renderBaseImage($baseImageFile);      
