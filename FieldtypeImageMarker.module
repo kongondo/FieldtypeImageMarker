@@ -73,7 +73,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		// y-coordinate label
 		$inputfield->set('yCoordinateLabel', $field->yCoordinateLabel);
 
-		// empty base image message
+		// empty base image field message
 		$inputfield->set('emptyBaseImageMessage', $field->emptyBaseImageMessage);
 
 		// default page selector (pagefield)
