@@ -28,7 +28,7 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 9,
+			'version' => 10,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'ImageMarker: Field that stores a table of ImageMarker coordinates for a page.',
@@ -72,6 +72,9 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 
 		// y-coordinate label
 		$inputfield->set('yCoordinateLabel', $field->yCoordinateLabel);
+
+		// empty base image message
+		$inputfield->set('emptyBaseImageMessage', $field->emptyBaseImageMessage);
 
 		// default page selector (pagefield)
 		$inputfield->set('defaultPageSelect', $field->defaultPageSelect);
@@ -154,6 +157,15 @@ class FieldtypeImageMarker extends FieldtypeMulti {
 		$f->attr('value', $field->yCoordinateLabel ? $field->yCoordinateLabel : 'Y-Coordinate');
 		$f->label = $this->_('Y-Coordinate label');
 		$f->description = $this->_('A label to use in the table header for y-coordinate.');
+		
+		$inputfields->append($f);
+
+		// message to show when no base image found
+		$f = $this->modules->get("InputfieldText");
+		$f->attr('name', 'emptyBaseImageMessage');
+		$f->attr('value', $field->emptyBaseImageMessage ? $field->emptyBaseImageMessage : $this->_('Base image not found. Please upload one and save the page in order to use this field.'));
+		$f->label = $this->_('Empty base image field');
+		$f->description = $this->_('Message to show when base image field is empty.');
 		
 		$inputfields->append($f);
 

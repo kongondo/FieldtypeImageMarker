@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 9,
+			'version' => 10,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'Image Marker: GUI (Inputfield) for FieldtypeImageMarker.',
@@ -111,7 +111,10 @@ class InputfieldImageMarker extends Inputfield {
 		if($validBaseFile === 0) return $this->field->error($valid['error']);
 		// empty file field
 		elseif($validBaseFile === -1) {
-			$out = '<h4>'.  $this->_('Base image not found. Please upload one and save the page in order to use this field.') . '</h4>';
+			// message to show if base image has been left empty (generic just in case nothing saved yet in $this->emptyBaseImageMessage)
+			$emptyBaseImageMessage = $this->emptyBaseImageMessage ? $this->emptyBaseImageMessage : $this->_('Missing base image.');
+			#$emptyBaseImageMessage = $this->emptyBaseImageMessage;
+			$out = '<h4>'. $emptyBaseImageMessage . '</h4>';
 			return $out;
 		}
 

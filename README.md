@@ -36,9 +36,10 @@ Install like any other ProcessWire module. If you cannot install via the modules
   3. **Information pages header** : An optional header for the first column of the table displaying each marker's coordinates in this field's **InputfieldImageMarker**. The default is _Information pages_.
   4. **X-Coordinates label** : Same as above but for the x-coordinates column of the table. The default is _X-Coordinate_.
   5. **Y-Coordinates label** : Same as above but for the y-coordinates column of the table. The default is _Y-Coordinate_.
-  6. **Method for selecting pages to add as markers** : Here you specify how you want to add pages that will be your markers. You have two choices, _Asm Select_ or _Page auto Complete_. It defaults to the former.
-  7. **Custom information pages selector** : By default InputfieldImageMarker will return 50 normal (i.e. non-admin, etc.) pages from your ProcessWire tree to be selectable as page markers. Using this setting, you can customise your selector as you wish. For instance, find pages of a certain template(s), or limit numbers, etc. Your custom selector will work with either of the input methods, i.e. _Asm Select_ of _Page auto Complete_.
-  8. **Custom PHP code to find selectable information pages** : Note that this will only work with _Asm Select_. This option supersedes any selector specified above. The option gives you a bit more freedom to find pages to be used as markers in your _marker_ field. Your code must be valid PHP code. The statement here has access to the ProcessWire API variables $page and $pages. Your code snippet must return either a **Page** or **PageArray**. If it returns a Page object, children of that page will be returned as the selectable page markers.
+  6. **Empty base image field** : Message to show if the base image field was left empty (i.e. no image uploaded yet).
+  7. **Method for selecting pages to add as markers** : Here you specify how you want to add pages that will be your markers. You have two choices, _Asm Select_ or _Page auto Complete_. It defaults to the former.
+  8. **Custom information pages selector** : By default InputfieldImageMarker will return 50 normal (i.e. non-admin, etc.) pages from your ProcessWire tree to be selectable as page markers. Using this setting, you can customise your selector as you wish. For instance, find pages of a certain template(s), or limit numbers, etc. Your custom selector will work with either of the input methods, i.e. _Asm Select_ of _Page auto Complete_.
+  9. **Custom PHP code to find selectable information pages** : Note that this will only work with _Asm Select_. This option supersedes any selector specified above. The option gives you a bit more freedom to find pages to be used as markers in your _marker_ field. Your code must be valid PHP code. The statement here has access to the ProcessWire API variables $page and $pages. Your code snippet must return either a **Page** or **PageArray**. If it returns a Page object, children of that page will be returned as the selectable page markers.
 
 ## How to Use
 -  Edit a page using the template you added the _marker_ field to.
@@ -84,6 +85,9 @@ Uninstall like any other third-party ProcessWire module.
 [Support forum](https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/).
 
 ## Changelog
+
+#### Version 010
+1. Made message to show if base image field empty configurable.
 
 #### Version 009
 1. If base image field empty, render relevant message rather than show field error. Allows for intentionally leaving base image field blank.
