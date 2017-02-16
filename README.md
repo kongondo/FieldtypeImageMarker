@@ -71,7 +71,7 @@ $out = '<img src="'. $page->base_image->url . '" alt="">';
 foreach ($page->marker as $m) {
 
   // do something with the following properties
-  $m->id;// e.g. $pages->get((int) $m->id);
+  $m->info;// e.g. $pages->get((int) $m->info);
   $m->x;
   $m->y;
   $m->infoLabel;

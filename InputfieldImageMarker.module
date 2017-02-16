@@ -114,7 +114,7 @@ class InputfieldImageMarker extends Inputfield {
 			// message to show if base image has been left empty (generic just in case nothing saved yet in $this->emptyBaseImageMessage)
 			$emptyBaseImageMessage = $this->emptyBaseImageMessage ? $this->emptyBaseImageMessage : $this->_('Missing base image.');
 			#$emptyBaseImageMessage = $this->emptyBaseImageMessage;
-			$out = '<h4>'. $emptyBaseImageMessage . '</h4>';
+			$out = '<h4>' . $emptyBaseImageMessage . '</h4>';
 			return $out;
 		}
 
