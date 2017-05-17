@@ -263,7 +263,7 @@ $(document).ready(function() {
 	// fixed width solution
 	function fixWidthHelper(e, ui) {
 		ui.children().each(function() {
-			$(this).width($(this).width());
+			$(this).width($(this).width());			
 		});
 		return ui;
 	}
