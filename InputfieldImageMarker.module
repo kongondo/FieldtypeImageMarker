@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 
 /**
 * InputfieldImageMarker for ProcessWire.
@@ -16,8 +16,8 @@
 * https://github.com/kongondo/FieldtypeImageMarker
 * Created December 2015
 * 
-* ProcessWire 2.x
-* Copyright (C) 2011 by Ryan Cramer
+* ProcessWire 3.x
+* Copyright (C) 2016 by Ryan Cramer
 * Licensed under MPL 2, see LICENSE.TXT
 *
 * http://www.processwire.com
@@ -29,7 +29,7 @@ class InputfieldImageMarker extends Inputfield {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Image Marker',
-			'version' => 10,
+			'version' => 11,
 			'author' => 'Francis Otieno (Kongondo), Helder Cervantes',
 			'href' => 'https://processwire.com/talk/topic/11863-module-imagemarker-fieldtype-inputfield/',
 			'summary' => 'Image Marker: GUI (Inputfield) for FieldtypeImageMarker.',
@@ -37,11 +37,21 @@ class InputfieldImageMarker extends Inputfield {
 			);
 	}
 
+	const IM_PREFIX = 'image_marker_';
+
 	/**
 	 * string name of the cookie used to save total number of coordinates' table rows to show per page when pagination in use.
 	 *
 	 */
-	private $cookieName;
+	private $cookieName;// @TODO...ARE WE USING THIS?
+
+	/**
+	 * object the page containing the IM for editing.
+	 *
+	 * Helps distinguish between normal vs editing in a repeater page.
+	 * 
+	 */
+	private $imageMarkerPage;
 
 	/**
 	 * int value of number of coordinates' table rows to show per page when pagination in use.
@@ -51,54 +61,32 @@ class InputfieldImageMarker extends Inputfield {
 	protected $page;
 	protected $field;
 
+
 	public function setPage(Page $page) {
-		$this->page = $page; 
+		$this->page = $page;
+		$this->setImageMarkerPage();
+		
 	}
 
 	public function setField(Field $field) {
 		$this->field = $field;
-	}
+	}	
 
 	/**
-	 * Render a table row for an individual ImageMarker input
+	 * Render the entire input area for ImageMarkers.
 	 *
-	 */
-	protected function renderRow(ImageMarker $ImageMarker, $cnt, $class = 'ImageMarker') {
-
-		$name = $this->attr('name');
-		
-		$info = (int) $ImageMarker->info;
-		$x = (int) $ImageMarker->x; 
-		$y = (int) $ImageMarker->y;
-		$label = $this->sanitizer->text($ImageMarker->infoLabel);
-
-		$i = $cnt + 1;
-
-		$out = "
-			<tr class='ImageMarker$cnt $class' data-marker='marker_{$info}'>
-				<td>
-					<input type='hidden' name='{$name}_info[]' class='marker_info' value='$info'>
-					<span>$i $label</span>
-				</td>
-				<td><input type='text' name='{$name}_x[]' value='$x' class='coords_x' data-marker='marker_{$info}_x'></td>
-				<td><input type='text' name='{$name}_y[]' value='$y' class='coords_y' data-marker='marker_{$info}_y'></td>
-				<td>
-					<a href='#' class='ImageMarkerDel ui-helper-clearfix'><span class='ui-icon ui-icon-trash'></span></a>
-					<input type='hidden' name='{$name}_del[]' value='0' />
-				</td>
-			</tr>
-			";
-		
-		return $out; 
-	}
-
-	/**
-	 * Render the entire input area for ImageMarkers
-	 *
+	 * @access public
+	 * @return string $out Markup of inputfield.
+	 * 
 	 */
 	public function ___render() {
+	
 
-		$out = '';
+		// @note: we have set the IM page in setPage()
+
+		#################
+
+		$out = '';		
 
 		// name of the single file field containing the base image on this page
 		// the class property was set in FieldtypeImageMarker getInputfield()
@@ -112,7 +100,7 @@ class InputfieldImageMarker extends Inputfield {
 		// empty file field
 		elseif($validBaseFile === -1) {
 			// message to show if base image has been left empty (generic just in case nothing saved yet in $this->emptyBaseImageMessage)
-			$emptyBaseImageMessage = $this->emptyBaseImageMessage ? $this->emptyBaseImageMessage : $this->_('Missing base image.');
+			$emptyBaseImageMessage = $this->emptyBaseImageMessage ? $this->emptyBaseImageMessage : $this->_('Image Marker: Missing base image.');
 			#$emptyBaseImageMessage = $this->emptyBaseImageMessage;
 			$out = '<h4>' . $emptyBaseImageMessage . '</h4>';
 			return $out;
@@ -140,9 +128,9 @@ class InputfieldImageMarker extends Inputfield {
 		$tbody = ''; 
 		
 		// render rows for existing ImageMarkers	
-		foreach($this->attr('value') as $cnt => $ImageMarker) {
-			$markers .= $this->renderMarkers($ImageMarker, $cnt);
-			$tbody .= $this->renderRow($ImageMarker, $cnt); 
+		foreach($this->attr('value') as $cnt => $imageMarker) {
+			$markers .= $this->renderMarkers($imageMarker, $cnt);
+			$tbody .= $this->renderRow($imageMarker, $cnt); 
 		}
 
 		$out .= $markers;
@@ -151,8 +139,10 @@ class InputfieldImageMarker extends Inputfield {
 		$out .= $this->renderPageSelect();
 		$out .= $this->coordinatesTablePaginationSelect();
 
+		$tableID = self::IM_PREFIX . "coord_table_{$this->name}";
+
 		$out .= "
-		<table class='InputfieldImageMarkers sortable'>
+		<table id='{$tableID}' class='InputfieldImageMarkers sortable'>
 			<thead>
 			<tr class=''>
 				<th class='ImageMarkerInfo'>" . $infoPageLabel . "</th>
@@ -169,14 +159,134 @@ class InputfieldImageMarker extends Inputfield {
 		</table>
 		";
 
+		// wrap it all up
+		$out = "<div class='image_marker_main_wrapper' data-im-field='{$this->name}'>{$out}</div>";
+		
 		return $out; 
+
 	}
 
 	/**
-	 * Render markup for selecting info pages
+	 * Set the IM page. We check if in normal ProcessPageEdit vs Repeater.
 	 *
+	 * Allows us to get the base image correctly.
+	 * 
+	 * @access public
+	 * 
 	 */
-	public function renderPageSelect() {
+	public function setImageMarkerPage() {
+		
+		// set the IM page. We check if in normal ProcessPageEdit vs Repeater	
+		//$process = $this->wire('process');
+
+		// first, we check if our vps inputfield is in a repeater
+		preg_match('/(_repeater[0-9]+)$/', $this->name, $match);
+		// if in a repeater, we adjust our 'current' page accordingly => it will be the repeater page
+		// that's where our items will live for this page
+		if(count($match)) {
+			$repeatPageID = (int) str_replace('_repeater', '', $match[0]);
+			$this->imageMarkerPage = $this->wire('pages')->get($repeatPageID);
+		}
+		// normal 
+		// @note: no need for this; we already got the normal page in FieldtypeImageMarker::getInputfield()
+		/* elseif($process && $process->className() == 'ProcessPageEdit') {
+			$this->imageMarkerPage = $process->getPage();// get the page being edited			
+		} */
+
+		// normal page
+		// @note: $this->page was set in FieldtypeImageMarker::getInputfield()
+		else $this->imageMarkerPage = $this->page;
+
+	}
+
+
+	/**
+	 * Load Asm and Autocomplete for repeaters
+	 *
+	 * @note: not using currently. Not very efficient if always loading + have no access to $this->field
+	 * 
+	 * @access public
+	 * 
+	 */
+	/* public function loadRepeaterResources() {
+
+		// styles and scripts
+		$config = $this->wire('config');
+
+		// if we are using page autocomplete inputfield to find info pages
+		if(2 == $this->field->defaultPageSelect) {
+			$url = $config->urls->InputfieldPageAutocomplete;
+			$config->styles->add($url . "InputfieldPageAutocomplete.css");
+			$config->scripts->add($url . "InputfieldPageAutocomplete.js");
+		}
+		// else we default to AsmSelect inputfield
+		else {
+
+			$url = $config->urls->InputfieldAsmSelect;
+			$config->styles->add($url . "InputfieldAsmSelect.css");
+			$config->styles->add($url . "asmselect/jquery.asmselect.css");
+			$config->scripts->add($url . "InputfieldAsmSelect.min.js");
+			$config->scripts->add($url . "asmselect/jquery.asmselect.min.js");
+
+		}
+
+	} */
+
+	/**
+	 * Render a table row for an individual ImageMarker input.
+	 *
+	 * @access private
+	 * @return string $out Markup of rendered row.
+	 * 
+	 */
+	private function renderRow(ImageMarker $imageMarker, $cnt, $class = 'ImageMarker') {
+		
+		//$name = $this->attr('name');
+		$name = $this->name;
+		$prefix = self::IM_PREFIX . $name;
+		
+		$info = (int) $imageMarker->info;
+		$x = (int) $imageMarker->x; 
+		$y = (int) $imageMarker->y;
+		$label = $this->wire('sanitizer')->text($imageMarker->infoLabel);
+
+		$i = $cnt + 1;
+
+		$out = "
+			<tr class='ImageMarker$cnt $class' data-marker='{$name}_marker_{$info}'>" .
+				"<td>" .
+					"<input type='hidden' name='{$prefix}_info[]' class='marker_info' value='{$info}'>" .
+					"<span>$i $label</span>" .
+				"</td>" .
+				"<td>" .
+					"<input type='text' name='{$prefix}_x[]' value='$x' class='coords_x' data-marker='{$name}_marker_{$info}_x'>" .
+				"</td>" .
+				"<td>".
+					"<input type='text' name='{$prefix}_y[]' value='$y' class='coords_y' data-marker='{$name}_marker_{$info}_y'>" .
+				"</td>" .
+				"<td>" .
+					"<a href='#' class='ImageMarkerDel ui-helper-clearfix'>".
+						"<span class='ui-icon ui-icon-trash'></span>".
+					"</a>" .
+					"<input type='hidden' name='{$prefix}_del[]' value='0'>" .
+				"</td>" .
+			"</tr>";
+		
+		return $out;
+		
+	}
+
+	/**
+	 * Render markup for selecting info pages.
+	 *
+	 * @access private
+	 * @return string $w->render() Markup of rendered InputfieldWrapper.
+	 * 
+	 */
+	private function renderPageSelect() {
+
+		$modules = $this->wire('modules');
+		$prefix = self::IM_PREFIX . $this->name;
 
 		$w = new InputfieldWrapper();
 			
@@ -189,45 +299,48 @@ class InputfieldImageMarker extends Inputfield {
 		$addInfoPagesSelect = 1;
 
 		// if we are using page autocomplete inputfield to find info pages
-		if ($this->defaultPageSelect == 2) {
-				
-				$addInfoPages = $this->modules->get('InputfieldPageAutocomplete');
-				$addInfoPages->set('findPagesSelector', $pagesSelector);
-				$addInfoPages->notes = $this->_('Start typing to search for pages.');
-
-				//we'll use this variable when saving PageAutocomplete values
-				$addInfoPagesSelect = 2;
+		if ($this->defaultPageSelect == 2) {				
+			$addInfoPages = $modules->get('InputfieldPageAutocomplete');
+			$addInfoPages->set('findPagesSelector', $pagesSelector);
+			$addInfoPages->notes = $this->_('Start typing to search for pages.');
+			// we'll use this variable when saving PageAutocomplete values
+			$addInfoPagesSelect = 2;
 		}
-
 		// else we default to AsmSelect inputfield
 		else {
 				
-				// if using custom PHP code to return selectable pages
-				if(strlen($this->findPagesCode)) $opts = $this->findPagesCode();
-				// else we use the default || custom selector
-				else $opts = $this->wire('pages')->find($pagesSelector);
+			// if using custom PHP code to return selectable pages
+			if(strlen($this->findPagesCode)) $opts = $this->findPagesCode();
+			// else we use the default || custom selector
+			else $opts = $this->wire('pages')->find($pagesSelector);
 
-				if(!count($opts)) {
-					$this->error($this->_('Your selector did not find any selectable pages for your markers! Confirm its validity.'));
-					$description = $this->_('No pages were found to add to add as markers. Rectify the specified error first.');
-				}
-				
-				$addInfoPages = $this->modules->get('InputfieldAsmSelect');
+			if(!count($opts)) {
+				$this->error($this->_('Image Marker: Your selector did not find any selectable pages for your markers! Confirm its validity.'));
+				$description = $this->_('Image Marker: No pages were found to add to add as markers. Rectify the specified error first.');
+			}
+			
+			$addInfoPages = $modules->get('InputfieldAsmSelect');
 
-				foreach($opts as $opt) $addInfoPages->addOption($opt->id, $opt->title);
+			foreach($opts as $opt) $addInfoPages->addOption($opt->id, $opt->title);
 
 		}
 
-		$addInfoPages->label = $this->_('Page Markers');
-		$addInfoPages->attr('name+id', 'marker_add_infopages');
+		// make it unique for multiple IMs on a page use
+		$addInfoPagesID = $prefix . '_marker_add_infopages';
+
+		$addInfoPages->attr('name+id', $addInfoPagesID);
+		$addInfoPages->label = $this->_('Page Markers');		
+		$addInfoPages->attr('class', 'marker_add_infopages');// @note: need for JS to loop through to disabled selected
 		$addInfoPages->description = $description;
 
 		$w->add($addInfoPages);// add page asmSelect/autocomplete to wrapper
 
 		// hidden field to post value to specify if using PageAutocomplete OR AsmSelect to select info pages to add as markers
 		// we use this to process added info pages
-		$h = $this->modules->get('InputfieldHidden');
-		$h->attr('name', 'marker_add_infopages_select');
+		$addInfoPagesSelectID = $prefix . '_marker_add_infopages_select';
+		$h = $modules->get('InputfieldHidden');
+		//$h->attr('name', 'marker_add_infopages_select');
+		$h->attr('name+id', $addInfoPagesSelectID);
 		$h->attr('value', $addInfoPagesSelect); 
 
 		$w->add($h);//add hidden field to markup
@@ -237,64 +350,61 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
-	 * Render markers (dots)
+	 * Render markers (dots).
 	 *
 	 * Markers rendered according to selected marker style by applying related CSS class.
 	 * Currently user can choose from 3 marker styles: circular (default), tear drop (gmap) and callout.
 	 *
-	 * @access public
+	 * @access private
 	 * @param object $im Instance of this ImageMarker.
 	 * @param object $cnt Integer numerical position of a single marker.
      * @return string $out Markup with a single marker's output.
      *
 	 */
-	public function renderMarkers($im, $cnt) {
+	private function renderMarkers($im, $cnt) {
 
 		$i = $cnt + 1;
 		$markerStyle = $this->markerStyle;			
 		$markerLabel = $i;
 		$title = $im->infoLabel;
 
-		if($markerStyle == 1) $markerStyleClass = 'circle';
-		elseif($markerStyle == 2) $markerStyleClass = 'teardrop';
+		if($markerStyle == 1) $markerStyleClass = ' circle';
+		elseif($markerStyle == 2) $markerStyleClass = ' teardrop';
 		elseif($markerStyle == 3) {
-			$markerStyleClass = 'callout';
+			$markerStyleClass = ' callout';
 			$markerLabel = $im->infoLabel;
 			$title = $i;
 		}
 
-		$out = '<div id="marker_'.$im->info.'" class="marker '.$markerStyleClass.'" title="'.$title.'" style="left: '.$im->x. '%; top: '.$im->y.'%;" data-row="'.$i.'">' .
-					'<span>' . $markerLabel . '</span>' .
-				'</div>';
+		$out = 
+			"<div id='{$this->name}_marker_{$im->info}' class='marker{$markerStyleClass}' title='{$title}' style='left: {$im->x}%; top: {$im->y}%;' data-row='{$i}'>" .
+				"<span>{$markerLabel}</span>" .
+			"</div>";
 
 		return $out;		
 		
 	}
 
 	/**
-	 * Render base image
+	 * Render base image.
 	 *
+	 * @access private
 	 * @param string $baseImageFile name of file field with base image.
      * @return string $out Markup with base image output.
      *
 	 */
-	public function renderBaseImage($baseImageFile) {
-
-		$process = $this->wire('process'); 
-		if($process && $process->className() == 'ProcessPageEdit') $page = $process->getPage();
-
-		$baseImage = $page->$baseImageFile->first()->url;
-		$out = '<img src="'. $baseImage . '" alt="" id="marker_base_image">';
-
-		return $out;
-		
+	private function renderBaseImage($baseImageFile) {
+		$baseImage = $this->imageMarkerPage->$baseImageFile->first()->url;
+		$out = '<img src="'. $baseImage . '" alt="" class="marker_base_image">';
+		return $out;		
 	}
 
 	/**
 	 * Checks for valid and non-empty file field with base image.
 	 *
+	 * @access private
 	 * @param string $field name of file field with base image.
-     * @return bool true|string $error
+     * @return bool true|string $error.
      *
 	 */
 	private function isValid($field = '') {
@@ -306,19 +416,16 @@ class InputfieldImageMarker extends Inputfield {
 		$valid['error'] = $error;
 
         // name of the single file field containing the base image on this page
-		if(!$field) $error = $this->_('You have to specify a valid file field with a base image');
+		if(!$field) $error = $this->_('Image Marker: You have to specify a valid file field with a base image');
 		else {
 
-			$process = $this->wire('process'); 
-			if($process && $process->className() == 'ProcessPageEdit') $page = $process->getPage();
-
 			// check if field exists
-			$f = $this->wire('fields')->get($this->sanitizer->fieldName($field));
+			$f = $this->wire('fields')->get($this->wire('sanitizer')->fieldName($field));
 			
-			if(!$f || !$f->id > 0)  $error = $this->_('The specified file field does not exist!');// no field
-			elseif (!$f->type instanceof FieldtypeFile) $error = $this->_('The specified field is not valid. You need to specify the name of a file field.');// wrong field type
-			elseif($page->$f->count < 1) $valid['valid'] = -1;
-			
+			if(!$f || !$f->id > 0)  $error = $this->_('Image Marker: The specified file field does not exist!');// no field
+			elseif (!$f->type instanceof FieldtypeFile) $error = $this->_('Image Marker: The specified field is not valid. You need to specify the name of a single file field.');// wrong field type
+			//elseif($page->$f->count < 1) $valid['valid'] = -1;
+			elseif($this->imageMarkerPage->$f->count < 1) $valid['valid'] = -1;			
 		}
 
 		if($error) {
@@ -331,14 +438,14 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
-	* Find pages to select as markers in AsmSelect using custom PHP code.
-	*
-	* Uses eval().
-	*
-	* @access private
-	* @return eval() of type Page or PageArray or null.
-	*
-	*/
+	 * Find pages to select as markers in AsmSelect using custom PHP code.
+	 *
+	 * Uses eval().
+	 *
+	 * @access private
+	 * @return eval() of type Page or PageArray or null.
+	 *
+	 */
 	private function findPagesCode() {
 
 		$page = $this->page;
@@ -358,38 +465,53 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
-	* Determines and sets the user-selected numbere of rows per page in paginated coordinates' table.
-	*
-	* Gets cookie set in js.
-	*
-	* @access private
-	* @return string|int $showRows pre-selection for select controlling number of rows per page in paginated coordinates' table.
-	*
-	*/
+	 * Determines and sets the user-selected numbere of rows per page in paginated coordinates' table.
+	 *
+	 * Gets cookie set in js.
+	 *
+	 * @access private
+	 * @return string|int $showRows pre-selection for select controlling number of rows per page in paginated coordinates' table.
+	 *
+	 */
 	private function coordinatesTablePaginationLimit() {
-		$showRows = $this->input->cookie->coordinatesTableRows;// js cookie to remember last selected for session
+		// js cookie to remember last selected for session
+		$cookieName = self::IM_PREFIX . "coord_table_{$this->name}";
+		$showRows = $this->wire('input')->cookie->$cookieName;
 		return $showRows;		
 	}
 
 	/**
-	* Return number of coordinates' table rows to show per page when using pagination.
-	*
-	* @access private
-	* @return string $limitSelect Markup for selecting number of table rows to display per page in pagination mode.
-	*
-	*/
+	 * Return number of coordinates' table rows to show per page when using pagination.
+	 *
+	 * @access private
+	 * @return string $limitSelect Markup for selecting number of table rows to display per page in pagination mode.
+	 *
+	 */
 	private function coordinatesTablePaginationSelect() {
 
 		$lastLimit = $this->coordinatesTablePaginationLimit();
 
 		// prepare values for 'Show XX Posts', i.e. number of posts to show per page in posts dashboard
 		$limitSelect = '';
-		$limitSelect .= '<div class="pagination_wrapper"><span class="limit_select">' . $this->_('Show ') . '<select id="limit" name="show_limit">';
+		$limitSelect .=
+			"<div class='pagination_wrapper'>".
+				"<span class='limit_select'>" . 
+					$this->_('Show ') . 
+					"<select class='limit' name='{$this->name}_show_limit}'>";
 
-		$limits = array( 'All', 5, 10, 15, 25, 50, 75, 100);
-
-		foreach ($limits as $limit) {					
-					$limitSelect .='<option value="' . $limit . '"' . ($lastLimit == $limit ? 'selected="selected"' : '') . '>' . $limit . '</option>';
+		$limits = array(
+			0 => $this->_('All'),
+			5 => '5',
+			10 =>'10',
+			15 => '15',
+			25 => '25',
+			50 => '50',
+			75 => '75',
+			100 => '100'
+		);
+			
+		foreach ($limits as $value => $label) {				
+			$limitSelect .='<option value="' . $value . '"' . ($lastLimit == $value ? 'selected="selected"' : '') . '>' . $label . '</option>';
 		}
 
 		$limitSelect .= '</select>'. $this->_(' Rows') . '</span></div>';
@@ -399,8 +521,10 @@ class InputfieldImageMarker extends Inputfield {
 	}
 
 	/**
-	 * Process input for the ImageMarkers inputs
+	 * Process input for the ImageMarkers inputs.
 	 *
+	 * @access public
+	 * 
 	 */
 	public function ___processInput(WireInputData $input) {
 
@@ -408,18 +532,23 @@ class InputfieldImageMarker extends Inputfield {
 			throw new WireException("This inputfield requires that you set valid 'page' and 'field' properties to it."); 
 		}
 
-		$name = $this->attr('name'); 
-		$ImageMarkers = $this->field->type->getBlankValue($this->page, $this->field); 
+		// prepare variables
+		$name = $this->attr('name');
+		$prefix = self::IM_PREFIX . $name;
+		$post = $this->wire('input')->post;		
+		$markerAddInfoPages = $prefix . '_marker_add_infopages';
+		$markerAddInfoPagesSelect = $prefix . '_marker_add_infopages_select';
+		$imageMarkers = $this->field->type->getBlankValue($this->page, $this->field); 
 		$numDeleted = 0; 
 		$duplicates = array();// to help remove duplicate info pages
 		$deleted = array();// due to some js issues, to help remove deleted from being re-added as new items		
 
 		// first we process existing values but first check if there's anything to process
-		if(is_array($input->{"{$name}_info"}) && count($input->{"{$name}_info"})) {
-			foreach($input->{"{$name}_info"} as $cnt => $info) {
+		if(is_array($input->{"{$prefix}_info"}) && count($input->{"{$prefix}_info"})) {
+			foreach($input->{"{$prefix}_info"} as $cnt => $info) {
 
 				// check if the item is being deleted
-				if($input->{"{$name}_del"}[$cnt]) {
+				if($input->{"{$prefix}_del"}[$cnt]) {
 					// if being deleted, then we simply skip over it
 					$numDeleted++;
 					$deleted[] = $info;
@@ -428,19 +557,20 @@ class InputfieldImageMarker extends Inputfield {
 
 				if(in_array($info, $duplicates)) continue;// skip duplicate info pages
 
-				// create the $ImageMarker and add it to our $ImageMarkers
-				$ImageMarker = new ImageMarker();
-				$ImageMarker->info = $info; 
-				$ImageMarker->x = $input->{"{$name}_x"}[$cnt];
-				$ImageMarker->y = $input->{"{$name}_y"}[$cnt];
-				$ImageMarkers->add($ImageMarker);
+				// create the $imageMarker and add it to our $imageMarkers
+				$imageMarker = new ImageMarker();
+				$imageMarker->info = $info; 
+				$imageMarker->x = $input->{"{$prefix}_x"}[$cnt];
+				$imageMarker->y = $input->{"{$prefix}_y"}[$cnt];
+				$imageMarkers->add($imageMarker);
 
 				$duplicates[] = $info;
 			}
 		}
 		// second, we process newly added markers
-		$addPages = $this->input->post->marker_add_infopages;
-		$addInfoPagesSelect = $this->input->post->marker_add_infopages_select;// determine if using PageAutocomplete vs AsmSelect
+		$addPages = $post->$markerAddInfoPages;
+		// determine if using PageAutocomplete vs AsmSelect
+		$addInfoPagesSelect = $post->$markerAddInfoPagesSelect;
 
 		// if using PageAutocomplete to add info pages
 		if($addInfoPagesSelect == 2) {
@@ -452,18 +582,15 @@ class InputfieldImageMarker extends Inputfield {
 		
 		// check if we have anything to process
 		if(is_array($addPages) && count($addPages)) {
-			foreach ($addPages as $p) {
-				
+			foreach ($addPages as $p) {				
 				// skip duplicate info pages + those being deleted
 				if(in_array($p, $duplicates) || in_array($p, $deleted)) continue;
-
-				// create the $ImageMarker and add it to our $ImageMarkers
-				$ImageMarker = new ImageMarker();
-				$ImageMarker->info = $p; 
-				$ImageMarker->x = '';// set to nothing since new
-				$ImageMarker->y = '';// ditto
-				$ImageMarkers->add($ImageMarker);
-
+				// create the $imageMarker and add it to our $imageMarkers
+				$imageMarker = new ImageMarker();
+				$imageMarker->info = $p; 
+				$imageMarker->x = '';// set to nothing since new
+				$imageMarker->y = '';// ditto
+				$imageMarkers->add($imageMarker);
 				$duplicates[] = $p;
 			}
 		}
@@ -473,10 +600,11 @@ class InputfieldImageMarker extends Inputfield {
 		// if the string values of the processed ImageMarkers are different from the previous,
 		// or if any ImageMarkers have been deleted, then flag this Inputfield as changed
 		// so that it will be automatically saved with the page
-		if("$ImageMarkers" != "$this->value" || $numDeleted) {
-			$this->attr('value', $ImageMarkers); 
+		if("$imageMarkers" != "$this->value" || $numDeleted) {
+			$this->attr('value', $imageMarkers); 
 			$this->trackChange('value'); 
 		}
 	}
+
 }
 

@@ -1,8 +1,23 @@
+/** 
+ *
+ * CSS file for PW Module InputfieldImageMarker.
+ *
+ * @author Francis Otieno (Kongondo) <kongondo@gmail.com>.
+ * @author Helder Cervantes (heldercervantes).
+
+ * @credits: Roland Toth (tpr).
+ * @credits Ryan Cramer.
+ *
+ * https://github.com/kongondo/FieldtypeImageMarker
+ * Created March 2015
+ *
+ */
+
 /* -- COORDINATES' TABLE -- */
 table.InputfieldImageMarkers {width: 100%;}
 .InputfieldImageMarkers table tr {border: none;}
 .InputfieldImageMarkers th {padding-bottom: 0; font-weight: bold;}
-.InputfieldImageMarkers tr:not(.ImageMarkerTBD):hover td {background: #EEE;}
+.InputfieldImageMarkers tr:not(.uk-alert-danger):hover td {background: #EEE;}
 
 .InputfieldImageMarkers input[type=number],
 .InputfieldImageMarkers input[type=number],
@@ -21,10 +36,14 @@ table.InputfieldImageMarkers {width: 100%;}
 .InputfieldImageMarkers .ImageMarkerCoords_Y {width: 25%; text-align: right;}
 .InputfieldImageMarkers th.ImageMarkerDel {width: 5%; padding-right: 0;}
 .InputfieldImageMarkers a.ImageMarkerDel {width: 1.5em; display: block;}
-.InputfieldImageMarkers .ImageMarkerTBD td input {text-decoration: line-through;}
+.InputfieldImageMarkers .uk-alert-danger td input {text-decoration: line-through;}
+
 tr a.ImageMarkerDel {padding-left: 15px;}
+
+/* @note: for div.marker */
 tr.highlighted {background: #D1F468;}
-tr.highlighted:hover td {background: #93BF0D !important;}
+/*@TODO: delete if not in use?
+tr.highlighted:hover td {background: #93BF0D !important;}*/
 
 input[type=text].coords_x, input[type=text].coords_y {text-align: right;}
 
@@ -36,21 +55,6 @@ table.InputfieldImageMarkers {display: none;}
 div.pagination_wrapper {margin: 1em 0;}
 span.limit_select {float: right; margin-right: 2em;}
 div.pager {margin: 1em 0;}
-
-div.pager span {
-	display: inline-block;
-	width: 1.8em;
-	height: 1.8em;
-	line-height: 1.8;
-	text-align: center;
-	cursor: pointer;
-	background: #000;
-	color: #FFF;
-	margin-right: 0.5em;
-}
-
-div.pager span.active {background: #C00;}
-
 
 /* -- MARKER STYLES -- */
 

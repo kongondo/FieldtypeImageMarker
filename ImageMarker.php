@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 
 /**
  * An individual ImageMarker item to be part of an ImageMarkerArray for a Page

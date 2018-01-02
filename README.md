@@ -86,6 +86,15 @@ Uninstall like any other third-party ProcessWire module.
 
 ## Changelog
 
+#### Version 011
+1. Support for ProcessWire 3.x only.
+2. Support for multiple ImageMarker inputfields in one page (using either different base images each [from different single file fields on the page] or one base image).
+3. Support for use in PageTable.
+4. Base Image select is now done using a pre-populated select inputfield.
+5. Pagination in marker table now resembles (CSS) the MarkupPageNav styles of the Admin theme in use.
+6. Improvements to marker table CSS to pick from the Admin theme (e.g. rows selected for deletion).
+7. Lots of code refactoring, especially the JavaScript.
+
 #### Version 010
 1. Made message to show if base image field empty configurable.
 
