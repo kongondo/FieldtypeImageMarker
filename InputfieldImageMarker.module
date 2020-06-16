@@ -54,6 +54,14 @@ class InputfieldImageMarker extends Inputfield {
 	private $imageMarkerPage;
 
 	/**
+	 * bool if in repeater versus normal page edit mode.
+	 *
+	 * We load Asm or Autocomplete assets using renderReady() if in repeater mode.
+	 * 
+	 */
+	private $repeaterMode;
+
+	/**
 	 * int value of number of coordinates' table rows to show per page when pagination in use.
 	 *
 	 */
@@ -62,10 +70,47 @@ class InputfieldImageMarker extends Inputfield {
 	protected $field;
 
 
+
+
+	/**
+	 * xxxxx @TODO...STILL NOT WORKING!
+	 *
+	 * @access public
+	 * 
+	 */
+	public function renderReady(Inputfield $parent = null, $renderValueMode = false) {
+
+		// if we are in normal page edit, i.e., not in repeaters, return early
+		if(!$this->repeaterMode) return parent::renderReady($parent, $renderValueMode);
+		
+		$field = $this->hasField;
+
+		// add styles and scripts if required, e.g. in repeaters
+
+		$config = $this->wire('config');
+		// if we are using page autocomplete inputfield to find info pages
+		if(2 == $field->defaultPageSelect) {
+			$url = $config->urls->InputfieldPageAutocomplete;
+			$config->styles->add($url . "InputfieldPageAutocomplete.css");
+			$config->scripts->add($url . "InputfieldPageAutocomplete.js");
+		}
+		// else we default to AsmSelect inputfield
+		else {
+			$url = $config->urls->InputfieldAsmSelect;
+			$config->styles->add($url . "InputfieldAsmSelect.css");
+			$config->styles->add($url . "asmselect/jquery.asmselect.css");
+			$config->scripts->add($url . "InputfieldAsmSelect.min.js");
+			$config->scripts->add($url . "asmselect/jquery.asmselect.min.js");
+		}
+
+		return parent::renderReady($parent, $renderValueMode);
+
+	}
+
+
 	public function setPage(Page $page) {
 		$this->page = $page;
-		$this->setImageMarkerPage();
-		
+		$this->setImageMarkerPage();		
 	}
 
 	public function setField(Field $field) {
@@ -81,7 +126,6 @@ class InputfieldImageMarker extends Inputfield {
 	 */
 	public function ___render() {
 	
-
 		// @note: we have set the IM page in setPage()
 
 		#################
@@ -177,7 +221,9 @@ class InputfieldImageMarker extends Inputfield {
 	public function setImageMarkerPage() {
 		
 		// set the IM page. We check if in normal ProcessPageEdit vs Repeater	
-		//$process = $this->wire('process');
+		//$process = $this->wire('process');		
+
+		$this->repeaterMode = false;
 
 		// first, we check if our vps inputfield is in a repeater
 		preg_match('/(_repeater[0-9]+)$/', $this->name, $match);
@@ -186,6 +232,7 @@ class InputfieldImageMarker extends Inputfield {
 		if(count($match)) {
 			$repeatPageID = (int) str_replace('_repeater', '', $match[0]);
 			$this->imageMarkerPage = $this->wire('pages')->get($repeatPageID);
+			$this->repeaterMode = true;
 		}
 		// normal 
 		// @note: no need for this; we already got the normal page in FieldtypeImageMarker::getInputfield()
@@ -420,12 +467,12 @@ class InputfieldImageMarker extends Inputfield {
 		else {
 
 			// check if field exists
-			$f = $this->wire('fields')->get($this->wire('sanitizer')->fieldName($field));
+			$f = $this->wire('fields')->get($this->wire('sanitizer')->fieldName($field));// @TODO..ideally, use ID for baseImage
 			
 			if(!$f || !$f->id > 0)  $error = $this->_('Image Marker: The specified file field does not exist!');// no field
 			elseif (!$f->type instanceof FieldtypeFile) $error = $this->_('Image Marker: The specified field is not valid. You need to specify the name of a single file field.');// wrong field type
 			//elseif($page->$f->count < 1) $valid['valid'] = -1;
-			elseif($this->imageMarkerPage->$f->count < 1) $valid['valid'] = -1;			
+			elseif($this->imageMarkerPage->$f->count < 1) $valid['valid'] = -1;	
 		}
 
 		if($error) {
